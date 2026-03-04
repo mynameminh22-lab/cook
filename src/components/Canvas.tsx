@@ -20,7 +20,7 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
 
   const handleClick = (e: React.MouseEvent) => {
     if ((type === 'switch' || type === 'spdt_switch') && onToggle) {
-      e.stopPropagation(); // Prevent drag start if clicking switch toggle
+      // Allow click to bubble up to select the component
       onToggle();
     }
   };
@@ -57,7 +57,7 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
           <circle cx="20" cy="32" r="3" fill="#1e293b" />
           <circle cx="44" cy="16" r="3" fill="#1e293b" />
           <circle cx="44" cy="48" r="3" fill="#1e293b" />
-          <line x1="20" y1="32" x2="42" y2={component.isOpen ? 18 : 46} stroke="#1e293b" strokeWidth="2" className="transition-all duration-200" />
+          <line x1="20" y1="32" x2="42" y2={component.isOpen ? 46 : 18} stroke="#1e293b" strokeWidth="2" className="transition-all duration-200" />
         </svg>
       )}
       {type === 'ground' && (
@@ -283,7 +283,8 @@ export function Canvas() {
     setScale,
     setOffset,
     wireMode,
-    snapToGrid
+    snapToGrid,
+    shortCircuitWarning
   } = useCircuitStore(useShallow(state => ({
     components: state.components,
     nodes: state.nodes,
@@ -305,7 +306,8 @@ export function Canvas() {
     setScale: state.setScale,
     setOffset: state.setOffset,
     wireMode: state.wireMode,
-    snapToGrid: state.snapToGrid
+    snapToGrid: state.snapToGrid,
+    shortCircuitWarning: state.shortCircuitWarning
   })));
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -314,7 +316,14 @@ export function Canvas() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [hasPanned, setHasPanned] = useState(false);
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+  const [hoveredWireIndex, setHoveredWireIndex] = useState<number | null>(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  
+  // Ref to track if we are interacting with a component (drag or click)
+  // to prevent container click from deselecting immediately
+  const isInteractingWithComponent = useRef(false);
 
   // Animation Loop
   useEffect(() => {
@@ -416,6 +425,7 @@ export function Canvas() {
 
   const startDrag = (e: React.MouseEvent | React.TouchEvent, id: string, pos: { x: number, y: number }, clientPos?: { x: number, y: number }) => {
     e.stopPropagation();
+    isInteractingWithComponent.current = true;
     // e.preventDefault(); // Don't prevent default here, it might block scrolling/other gestures if not careful. 
     // But for drag, we usually want to prevent default.
     
@@ -476,6 +486,10 @@ export function Canvas() {
 
     const handleWindowUp = () => {
       setDraggingId(null);
+      // Reset interaction flag after a short delay to allow click events to process
+      setTimeout(() => {
+          isInteractingWithComponent.current = false;
+      }, 100);
     };
 
     window.addEventListener('mousemove', handleWindowMouseMove);
@@ -492,9 +506,12 @@ export function Canvas() {
   }, [draggingId, dragOffset, moveComponent, gridSize, scale, offset]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+    // Middle click, Shift+Click, or Left Click on background (if not dragging component)
+    // Note: Component mousedown stops propagation, so if we reach here, we are on background.
+    if (e.button === 1 || (e.button === 0 && e.shiftKey) || e.button === 0) {
       e.preventDefault();
       setIsPanning(true);
+      setHasPanned(false);
       setPanStart({ x: e.clientX, y: e.clientY });
     }
   };
@@ -503,6 +520,11 @@ export function Canvas() {
     if (isPanning) {
       const dx = e.clientX - panStart.x;
       const dy = e.clientY - panStart.y;
+      
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+          setHasPanned(true);
+      }
+
       setOffset({ x: offset.x + dx, y: offset.y + dy });
       setPanStart({ x: e.clientX, y: e.clientY });
       return;
@@ -633,8 +655,14 @@ export function Canvas() {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setSelectedId(null);
+        setSelectedWireIndex(null);
+        setWiringStartNode(null);
+      }}
       onClick={() => {
-        if (!isPanning) {
+        if (!isPanning && !isInteractingWithComponent.current && !hasPanned) {
             setSelectedId(null);
             setSelectedWireIndex(null);
             setWiringStartNode(null);
@@ -693,6 +721,16 @@ export function Canvas() {
                 e.stopPropagation();
                 setSelectedWireIndex(idx);
                 setSelectedId(null);
+              }}
+              onMouseEnter={(e) => {
+                setHoveredWireIndex(idx);
+                setTooltipPos({ x: e.clientX, y: e.clientY });
+              }}
+              onMouseMove={(e) => {
+                setTooltipPos({ x: e.clientX, y: e.clientY });
+              }}
+              onMouseLeave={() => {
+                setHoveredWireIndex(null);
               }}
               className="cursor-pointer hover:opacity-80"
             >
@@ -765,6 +803,14 @@ export function Canvas() {
         })()}
       </svg>
 
+      {/* Short Circuit Warning */}
+      {shortCircuitWarning && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 animate-pulse border-2 border-red-400">
+          <AlertTriangle size={24} className="text-yellow-300 fill-current" />
+          <span className="font-bold text-lg tracking-wide uppercase">Cảnh báo: Ngắn mạch!</span>
+        </div>
+      )}
+
       {/* Components Layer */}
       {components.map((comp) => (
         <div
@@ -777,7 +823,16 @@ export function Canvas() {
           }}
           onMouseDown={(e) => {
             if (comp.type === 'push_button' && !e.ctrlKey && !e.metaKey) {
-              // Push button logic handled inside visual or separate handler
+              e.stopPropagation();
+              // Momentary switch logic: Press = Close (isOpen: false)
+              useCircuitStore.getState().updateComponent(comp.id, { isOpen: false });
+              
+              const handleMouseUp = () => {
+                // Release = Open (isOpen: true)
+                useCircuitStore.getState().updateComponent(comp.id, { isOpen: true });
+                window.removeEventListener('mouseup', handleMouseUp);
+              };
+              window.addEventListener('mouseup', handleMouseUp);
             } else {
               startDrag(e, comp.id, comp.position);
             }
@@ -826,6 +881,32 @@ export function Canvas() {
       ))}
       </div>
       
+      {/* Wire Tooltip */}
+      {hoveredWireIndex !== null && wires[hoveredWireIndex] && (() => {
+        const wire = wires[hoveredWireIndex];
+        const startNode = nodes.find(n => n.id === wire.from);
+        const endNode = nodes.find(n => n.id === wire.to);
+        const voltage = startNode && endNode ? (startNode.voltage + endNode.voltage) / 2 : 0;
+        
+        return (
+          <div 
+            className="fixed z-[100] bg-slate-800/90 text-white text-xs p-2 rounded-lg shadow-xl backdrop-blur-sm border border-slate-700 pointer-events-none"
+            style={{ 
+              left: tooltipPos.x + 15, 
+              top: tooltipPos.y + 15 
+            }}
+          >
+            <div className="font-bold mb-1 text-slate-300">Dây dẫn #{hoveredWireIndex + 1}</div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+              <span className="text-slate-400">Dòng điện:</span>
+              <span className="font-mono text-blue-400">{formatValue(wire.current || 0, 'A')}</span>
+              <span className="text-slate-400">Điện áp:</span>
+              <span className="font-mono text-yellow-400">{formatValue(voltage, 'V')}</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Zoom Controls */}
       <div className="absolute bottom-6 right-6 flex items-center gap-1 z-50 bg-white/90 backdrop-blur-sm p-1.5 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-slate-200/60">
         <button 

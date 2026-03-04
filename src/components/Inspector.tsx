@@ -135,6 +135,17 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
               onChange={handleChange}
               className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
             />
+            {(selectedComponent.type === 'resistor' || selectedComponent.type === 'potentiometer' || selectedComponent.type === 'battery') && (
+                <input 
+                    type="range" 
+                    min="0" 
+                    max={selectedComponent.type === 'battery' ? 24 : 10000} 
+                    step={selectedComponent.type === 'battery' ? 0.5 : 10}
+                    value={selectedComponent.value}
+                    onChange={handleChange}
+                    className="w-full mt-3 accent-blue-600 cursor-pointer"
+                />
+            )}
           </div>
         )}
 

@@ -10,6 +10,8 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
   const n = nodes.length;
   if (n === 0) return { nodes, components, wires };
 
+  let hasShortCircuit = false;
+
   // 2. Build MNA Matrix
   const voltageSources = components.filter(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'opamp');
   const m = voltageSources.length;
@@ -432,6 +434,11 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
       }
     }
 
+    // Check for short circuit (high current)
+    if (Math.abs(current) > 20) { // 20A threshold
+        hasShortCircuit = true;
+    }
+
     // Recalculate temp for battery/source if needed, but for now just default
     let finalTemp = typeof temp !== 'undefined' ? temp : 25;
     if (comp.type === 'battery' || comp.type === 'ac_source') {
@@ -472,6 +479,7 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
   return { 
     nodes: nodesChanged ? newNodes : nodes, 
     components: componentsChanged ? newComponents : components, 
-    wires: wiresChanged ? newWires : wires 
+    wires: wiresChanged ? newWires : wires,
+    hasShortCircuit
   };
 }

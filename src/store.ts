@@ -52,6 +52,10 @@ interface CircuitStore extends CircuitState {
   evaluationResult: EvaluationResult | null;
   evaluateCircuit: () => void;
   levelProgress: Record<number, LevelProgress>;
+  showUI: boolean;
+  setShowUI: (show: boolean) => void;
+  controlMode: 'mouse' | 'touch';
+  setControlMode: (mode: 'mouse' | 'touch') => void;
 }
 
 const INITIAL_STATE: CircuitState = {
@@ -119,6 +123,10 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
   shortCircuitWarning: false,
   setShortCircuitWarning: (warning) => set({ shortCircuitWarning: warning }),
   evaluationResult: null,
+  showUI: true,
+  setShowUI: (show) => set({ showUI: show }),
+  controlMode: 'mouse', // Default to mouse, can detect later
+  setControlMode: (mode) => set({ controlMode: mode }),
   evaluateCircuit: () => {
     const state = get();
     const result = analyzeCircuit(state);

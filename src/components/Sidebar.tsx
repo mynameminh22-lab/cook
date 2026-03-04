@@ -18,7 +18,7 @@ const COMPONENT_GROUPS = [
     ]
   },
   {
-    title: "Bán dẫn & Tích cực",
+    title: "Linh kiện bán dẫn",
     items: [
       { type: 'diode', label: 'Đi-ốt', icon: ArrowRightToLine },
       { type: 'npn_transistor', label: 'Transistor NPN', icon: Share2 },
@@ -36,7 +36,7 @@ const COMPONENT_GROUPS = [
     ]
   },
   {
-    title: "Thụ động",
+    title: "Linh kiện thụ động",
     items: [
       { type: 'resistor', label: 'Điện trở', icon: Activity },
       { type: 'capacitor', label: 'Tụ điện', icon: Radio },
@@ -45,14 +45,14 @@ const COMPONENT_GROUPS = [
     ]
   },
   {
-    title: "Đầu ra",
+    title: "Thiết bị đầu ra",
     items: [
       { type: 'lamp', label: 'Bóng đèn', icon: Lightbulb },
       { type: 'led', label: 'Đèn LED', icon: Sun },
     ]
   },
   {
-    title: "Đo lường",
+    title: "Thiết bị đo",
     items: [
       { type: 'voltmeter', label: 'Vôn kế', icon: Gauge },
       { type: 'ammeter', label: 'Ampe kế', icon: Search },

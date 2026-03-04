@@ -64,7 +64,7 @@ export function Toolbar({
   };
 
   return (
-    <div className="h-14 md:h-16 bg-white border-b border-slate-200 flex items-center px-3 md:px-6 justify-between shadow-[0_4px_24px_rgba(0,0,0,0.02)] z-30 shrink-0">
+    <div className="h-14 md:h-16 bg-white border-b border-slate-200 flex items-center px-3 md:px-6 justify-between shadow-[0_4px_24px_rgba(0,0,0,0.02)] z-50 shrink-0">
       <div className="flex items-center gap-2 md:gap-6">
         {/* Mobile Sidebar Toggle */}
         <button 

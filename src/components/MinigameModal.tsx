@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { LEVELS, Level } from '../data/levels';
 import { useCircuitStore } from '../store';
-import { X, PlayCircle, Trophy, Star, Zap } from 'lucide-react';
+import { X, PlayCircle, Trophy, Star, Zap, Wrench, PlusCircle, BookOpen } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface MinigameModalProps {
@@ -11,13 +11,15 @@ interface MinigameModalProps {
 }
 
 export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
-  if (!isOpen) return null;
+  const [activeTab, setActiveTab] = useState<'basic' | 'repair' | 'build'>('basic');
 
   const { setCurrentLevelId, loadCircuit, levelProgress } = useCircuitStore(useShallow(state => ({
     setCurrentLevelId: state.setCurrentLevelId,
     loadCircuit: state.loadCircuit,
     levelProgress: state.levelProgress
   })));
+
+  if (!isOpen) return null;
 
   const handleSelectLevel = (levelId: number) => {
     const level = LEVELS.find(l => l.id === levelId);
@@ -31,7 +33,13 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
   const renderLevelCard = (level: Level) => {
     const progress = levelProgress[level.id];
     const stars = progress?.stars || 0;
-    const isLocked = level.id > 1 && !levelProgress[level.id - 1]?.completed;
+    // Lock logic: Basic levels unlock sequentially. Repair/Build levels unlock sequentially within their category.
+    // For simplicity, let's just check if previous level in the SAME category is completed.
+    const levelCategory = level.category || 'basic';
+    const levelsInCategory = LEVELS.filter(l => (l.category || 'basic') === levelCategory).sort((a,b) => a.id - b.id);
+    const index = levelsInCategory.findIndex(l => l.id === level.id);
+    const prevLevel = index > 0 ? levelsInCategory[index - 1] : null;
+    const isLocked = prevLevel ? !levelProgress[prevLevel.id]?.completed : false;
 
     return (
       <button
@@ -52,7 +60,7 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
               ? "bg-slate-100 text-slate-400 border-slate-200"
               : "bg-indigo-50 text-indigo-600 border-indigo-100/50 group-hover:bg-indigo-600 group-hover:text-white"
           )}>
-            {level.id}
+            {level.id > 100 ? level.id % 100 : level.id}
           </span>
           {progress?.completed ? (
              <div className="flex gap-0.5">
@@ -89,9 +97,7 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
     );
   };
 
-  const easyLevels = LEVELS.filter(l => l.difficulty === 'Easy');
-  const mediumLevels = LEVELS.filter(l => l.difficulty === 'Medium');
-  const hardLevels = LEVELS.filter(l => l.difficulty === 'Hard');
+  const currentLevels = LEVELS.filter(l => (l.category || 'basic') === activeTab);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
@@ -105,7 +111,7 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
             </div>
             <div>
               <h2 className="text-2xl font-black tracking-tight">Thử thách Giải đố</h2>
-              <p className="text-indigo-100/90 text-sm font-medium mt-0.5">Học cách lắp ráp mạch điện qua {LEVELS.length} màn chơi</p>
+              <p className="text-indigo-100/90 text-sm font-medium mt-0.5">Học cách lắp ráp mạch điện qua các màn chơi</p>
             </div>
           </div>
           <button 
@@ -116,48 +122,56 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6">
+          <button
+            onClick={() => setActiveTab('basic')}
+            className={cn(
+              "flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2",
+              activeTab === 'basic' 
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+            )}
+          >
+            <BookOpen size={18} />
+            Cơ bản
+          </button>
+          <button
+            onClick={() => setActiveTab('repair')}
+            className={cn(
+              "flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2",
+              activeTab === 'repair' 
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+            )}
+          >
+            <Wrench size={18} />
+            Sửa mạch
+          </button>
+          <button
+            onClick={() => setActiveTab('build')}
+            className={cn(
+              "flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2",
+              activeTab === 'build' 
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+            )}
+          >
+            <PlusCircle size={18} />
+            Thêm linh kiện
+          </button>
+        </div>
+
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50/50 custom-scrollbar">
-          
-          {/* Easy Section */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
-                <Zap size={20} fill="currentColor" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800">Cơ bản</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {easyLevels.map(renderLevelCard)}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {currentLevels.map(renderLevelCard)}
           </div>
-
-          {/* Medium Section */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
-                <Zap size={20} fill="currentColor" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800">Trung bình</h3>
+          {currentLevels.length === 0 && (
+            <div className="text-center py-20 text-slate-400">
+              <p>Chưa có màn chơi nào trong mục này.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {mediumLevels.map(renderLevelCard)}
-            </div>
-          </div>
-
-          {/* Hard Section */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="p-2 bg-rose-100 rounded-lg text-rose-600">
-                <Zap size={20} fill="currentColor" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800">Nâng cao</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {hardLevels.map(renderLevelCard)}
-            </div>
-          </div>
-
+          )}
         </div>
 
       </div>
