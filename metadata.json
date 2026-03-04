@@ -1,0 +1,5 @@
+{
+  "name": "CircuitSim - Mô phỏng Mạch điện",
+  "description": "Công cụ thiết kế và mô phỏng mạch điện trực quan với phân tích thời gian thực.",
+  "requestFramePermissions": []
+}
