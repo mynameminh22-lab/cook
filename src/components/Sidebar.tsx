@@ -4,7 +4,7 @@ import { ComponentType } from '../types';
 import { 
   Battery, Zap, Lightbulb, Activity, ToggleLeft, Gauge, Search, Sliders, ZapOff, Sun, Type, 
   ArrowDownToLine, CircleDot, GitBranch, ChevronDown, ChevronRight,
-  Radio, Cpu, ArrowRightToLine, Waves, Share2, Triangle
+  Radio, Cpu, ArrowRightToLine, Waves, Share2, Triangle, Binary
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -24,6 +24,17 @@ const COMPONENT_GROUPS = [
       { type: 'npn_transistor', label: 'Transistor NPN', icon: Share2 },
       { type: 'pnp_transistor', label: 'Transistor PNP', icon: Share2 },
       { type: 'opamp', label: 'Op-Amp', icon: Triangle },
+    ]
+  },
+  {
+    title: "Cổng Logic",
+    items: [
+      { type: 'and_gate', label: 'Cổng AND', icon: Binary },
+      { type: 'or_gate', label: 'Cổng OR', icon: Binary },
+      { type: 'not_gate', label: 'Cổng NOT', icon: Binary },
+      { type: 'nand_gate', label: 'Cổng NAND', icon: Binary },
+      { type: 'nor_gate', label: 'Cổng NOR', icon: Binary },
+      { type: 'xor_gate', label: 'Cổng XOR', icon: Binary },
     ]
   },
   {
@@ -70,11 +81,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const addComponent = useCircuitStore((state) => state.addComponent);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     "Nguồn điện": true,
-    "Bán dẫn & Tích cực": true,
+    "Linh kiện bán dẫn": true,
+    "Cổng Logic": true,
     "Điều khiển": true,
-    "Thụ động": true,
-    "Đầu ra": true,
-    "Đo lường": true,
+    "Linh kiện thụ động": true,
+    "Thiết bị đầu ra": true,
+    "Thiết bị đo": true,
     "Khác": true
   });
 

@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useCircuitStore } from '../store';
 import { 
   Play, Pause, RotateCcw, Trash2, Undo, Redo, 
-  Grid, CornerUpRight, Minus, Activity, FolderOpen, RefreshCw, BookOpen, Wand2, Gamepad2, CheckCircle, Menu, Settings
+  Grid, CornerUpRight, Minus, Activity, FolderOpen, RefreshCw, BookOpen, Wand2, Gamepad2, CheckCircle, Menu, Settings, Save, Upload
 } from 'lucide-react';
 import { BASIC_EXAMPLES, COMPLEX_EXAMPLES } from '../examples';
 import { cn } from '../lib/utils';
@@ -53,6 +53,8 @@ export function Toolbar({
     setShowOscilloscope: state.setShowOscilloscope
   })));
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleDelete = () => {
     if (selectedId) {
       removeComponent(selectedId);
@@ -60,6 +62,47 @@ export function Toolbar({
     } else if (selectedWireIndex !== null) {
       removeWire(selectedWireIndex);
       useCircuitStore.getState().setSelectedWireIndex(null);
+    }
+  };
+
+  const handleSave = () => {
+    const state = useCircuitStore.getState();
+    const data = {
+      components: state.components,
+      wires: state.wires,
+      nodes: state.nodes
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `circuit-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (data.components && data.wires && data.nodes) {
+          loadCircuit(data);
+        } else {
+          alert('File không hợp lệ!');
+        }
+      } catch (error) {
+        alert('Lỗi khi đọc file!');
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -119,6 +162,29 @@ export function Toolbar({
               ))}
             </div>
           </div>
+
+          <button 
+            onClick={handleSave}
+            className="p-2.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg active:scale-95 transition-all"
+            title="Lưu mạch"
+          >
+            <Save size={18} />
+          </button>
+          
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg active:scale-95 transition-all"
+            title="Tải mạch"
+          >
+            <Upload size={18} />
+          </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleLoad} 
+            accept=".json" 
+            className="hidden" 
+          />
         </div>
 
         {/* Undo/Redo/Delete - Visible on Tablet+ */}

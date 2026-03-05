@@ -1,4 +1,4 @@
-export type ComponentType = 'resistor' | 'battery' | 'lamp' | 'wire' | 'ground' | 'switch' | 'push_button' | 'spdt_switch' | 'voltmeter' | 'ammeter' | 'potentiometer' | 'fuse' | 'led' | 'text' | 'capacitor' | 'inductor' | 'diode' | 'ac_source' | 'npn_transistor' | 'pnp_transistor' | 'opamp';
+export type ComponentType = 'resistor' | 'battery' | 'lamp' | 'wire' | 'ground' | 'switch' | 'push_button' | 'spdt_switch' | 'voltmeter' | 'ammeter' | 'potentiometer' | 'fuse' | 'led' | 'text' | 'capacitor' | 'inductor' | 'diode' | 'ac_source' | 'npn_transistor' | 'pnp_transistor' | 'opamp' | 'and_gate' | 'or_gate' | 'not_gate' | 'nand_gate' | 'nor_gate' | 'xor_gate' | 'seven_segment';
 
 export interface Point {
   x: number;

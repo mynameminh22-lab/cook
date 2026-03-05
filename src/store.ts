@@ -56,6 +56,8 @@ interface CircuitStore extends CircuitState {
   setShowUI: (show: boolean) => void;
   controlMode: 'mouse' | 'touch';
   setControlMode: (mode: 'mouse' | 'touch') => void;
+  laserMode: boolean;
+  setLaserMode: (active: boolean) => void;
 }
 
 const INITIAL_STATE: CircuitState = {
@@ -127,6 +129,8 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
   setShowUI: (show) => set({ showUI: show }),
   controlMode: 'mouse', // Default to mouse, can detect later
   setControlMode: (mode) => set({ controlMode: mode }),
+  laserMode: false,
+  setLaserMode: (mode) => set({ laserMode: mode }),
   evaluateCircuit: () => {
     const state = get();
     const result = analyzeCircuit(state);
@@ -338,6 +342,13 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
       n1Pos = { x: finalPosition.x - 30, y: finalPosition.y - 15 }; // Inverting (-)
       n2Pos = { x: finalPosition.x - 30, y: finalPosition.y + 15 }; // Non-inverting (+)
       n3Pos = { x: finalPosition.x + 30, y: finalPosition.y }; // Output
+    } else if (['and_gate', 'or_gate', 'nand_gate', 'nor_gate', 'xor_gate'].includes(type)) {
+      n1Pos = { x: finalPosition.x - 30, y: finalPosition.y - 15 }; // Input 1
+      n2Pos = { x: finalPosition.x - 30, y: finalPosition.y + 15 }; // Input 2
+      n3Pos = { x: finalPosition.x + 30, y: finalPosition.y }; // Output
+    } else if (type === 'not_gate') {
+      n1Pos = { x: finalPosition.x - 30, y: finalPosition.y }; // Input
+      n2Pos = { x: finalPosition.x + 30, y: finalPosition.y }; // Output
     }
     
     if (rotation === 90) {
@@ -351,10 +362,13 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
          n1Pos = { x: finalPosition.x, y: finalPosition.y - 20 }; // Base
          n2Pos = { x: finalPosition.x + 20, y: finalPosition.y + 20 }; // Collector
          n3Pos = { x: finalPosition.x - 20, y: finalPosition.y + 20 }; // Emitter
-      } else if (type === 'opamp') {
-         n1Pos = { x: finalPosition.x + 15, y: finalPosition.y - 30 }; // Inverting
-         n2Pos = { x: finalPosition.x - 15, y: finalPosition.y - 30 }; // Non-inverting
+      } else if (type === 'opamp' || ['and_gate', 'or_gate', 'nand_gate', 'nor_gate', 'xor_gate'].includes(type)) {
+         n1Pos = { x: finalPosition.x + 15, y: finalPosition.y - 30 }; // Input 1
+         n2Pos = { x: finalPosition.x - 15, y: finalPosition.y - 30 }; // Input 2
          n3Pos = { x: finalPosition.x, y: finalPosition.y + 30 }; // Output
+      } else if (type === 'not_gate') {
+         n1Pos = { x: finalPosition.x, y: finalPosition.y - 30 };
+         n2Pos = { x: finalPosition.x, y: finalPosition.y + 30 };
       } else {
          n1Pos = { x: finalPosition.x, y: finalPosition.y - 30 };
          n2Pos = { x: finalPosition.x, y: finalPosition.y + 30 };
@@ -382,7 +396,7 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
         newComponent.nodes.push(node2Id);
     }
 
-    if (type === 'spdt_switch' || type === 'npn_transistor' || type === 'pnp_transistor' || type === 'opamp') {
+    if (type === 'spdt_switch' || type === 'npn_transistor' || type === 'pnp_transistor' || type === 'opamp' || ['and_gate', 'or_gate', 'nand_gate', 'nor_gate', 'xor_gate'].includes(type)) {
       const node3: Node = {
         id: node3Id,
         position: n3Pos,
@@ -737,10 +751,13 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
              n1Pos = { x: c.position.x - 20, y: c.position.y };
              n2Pos = { x: c.position.x + 20, y: c.position.y - 20 };
              n3Pos = { x: c.position.x + 20, y: c.position.y + 20 };
-          } else if (c.type === 'opamp') {
+          } else if (c.type === 'opamp' || ['and_gate', 'or_gate', 'nand_gate', 'nor_gate', 'xor_gate'].includes(c.type)) {
              n1Pos = { x: c.position.x - 30, y: c.position.y - 15 };
              n2Pos = { x: c.position.x - 30, y: c.position.y + 15 };
              n3Pos = { x: c.position.x + 30, y: c.position.y };
+          } else if (c.type === 'not_gate') {
+             n1Pos = { x: c.position.x - 30, y: c.position.y };
+             n2Pos = { x: c.position.x + 30, y: c.position.y };
           }
 
           const n1 = nodes.find(n => n.id === c.nodes[0]);

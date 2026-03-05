@@ -80,6 +80,12 @@ export function LevelPanel() {
           <p className="text-sm text-slate-700 leading-relaxed font-medium">
             {currentLevel.description}
           </p>
+          {currentLevel.principle && (
+            <div className="mt-4 pt-4 border-t border-slate-200">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nguyên lý:</p>
+                <p className="text-sm text-slate-600 italic">{currentLevel.principle}</p>
+            </div>
+          )}
         </div>
       </div>
 

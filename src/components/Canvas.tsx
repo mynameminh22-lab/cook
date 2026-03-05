@@ -242,6 +242,58 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
           <text x="20" y="48" fontSize="10" fill="#1e293b" fontWeight="bold">+</text>
         </svg>
       )}
+
+      {type === 'and_gate' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <path d="M 16 12 V 52 H 32 A 20 20 0 0 0 32 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
+          <line x1="52" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+        </svg>
+      )}
+      {type === 'nand_gate' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <path d="M 16 12 V 52 H 32 A 20 20 0 0 0 32 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
+          <line x1="58" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <circle cx="55" cy="32" r="3" fill="white" stroke="#1e293b" strokeWidth="2" />
+        </svg>
+      )}
+      {type === 'or_gate' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <path d="M 16 12 Q 24 32 16 52 Q 40 52 52 32 Q 40 12 16 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="20" x2="18" y2="20" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="44" x2="18" y2="44" stroke="#1e293b" strokeWidth="2" />
+          <line x1="52" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+        </svg>
+      )}
+      {type === 'nor_gate' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <path d="M 16 12 Q 24 32 16 52 Q 40 52 52 32 Q 40 12 16 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="20" x2="18" y2="20" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="44" x2="18" y2="44" stroke="#1e293b" strokeWidth="2" />
+          <line x1="58" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <circle cx="55" cy="32" r="3" fill="white" stroke="#1e293b" strokeWidth="2" />
+        </svg>
+      )}
+      {type === 'xor_gate' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <path d="M 20 12 Q 28 32 20 52 Q 44 52 56 32 Q 44 12 20 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <path d="M 12 12 Q 20 32 12 52" fill="none" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
+          <line x1="56" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+        </svg>
+      )}
+      {type === 'not_gate' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <polygon points="16,16 16,48 48,32" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="54" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <circle cx="51" cy="32" r="3" fill="white" stroke="#1e293b" strokeWidth="2" />
+        </svg>
+      )}
       
       {/* Value Label */}
       <div className="absolute -bottom-6 text-[10px] whitespace-nowrap bg-white px-1 rounded border border-slate-200 z-30 pointer-events-none shadow-sm transition-opacity duration-200 opacity-0 group-hover:opacity-100">
@@ -424,7 +476,6 @@ export function Canvas() {
   };
 
   const startDrag = (e: React.MouseEvent | React.TouchEvent, id: string, pos: { x: number, y: number }, clientPos?: { x: number, y: number }) => {
-    e.stopPropagation();
     isInteractingWithComponent.current = true;
     // e.preventDefault(); // Don't prevent default here, it might block scrolling/other gestures if not careful. 
     // But for drag, we usually want to prevent default.
@@ -506,28 +557,33 @@ export function Canvas() {
   }, [draggingId, dragOffset, moveComponent, gridSize, scale, offset]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Middle click, Shift+Click, or Left Click on background (if not dragging component)
-    // Note: Component mousedown stops propagation, so if we reach here, we are on background.
-    if (e.button === 1 || (e.button === 0 && e.shiftKey) || e.button === 0) {
+    // Only pan if we are clicking directly on the canvas container (background)
+    if (e.target !== containerRef.current) return;
+
+    // Pan on Right Click (button 2) OR Left Click (button 0)
+    if (e.button === 2 || e.button === 0) {
       e.preventDefault();
-      setIsPanning(true);
       setHasPanned(false);
       setPanStart({ x: e.clientX, y: e.clientY });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning) {
-      const dx = e.clientX - panStart.x;
-      const dy = e.clientY - panStart.y;
-      
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-          setHasPanned(true);
-      }
-
-      setOffset({ x: offset.x + dx, y: offset.y + dy });
-      setPanStart({ x: e.clientX, y: e.clientY });
-      return;
+    // If we are holding a button and it's on the background, we might be panning
+    if ((e.buttons === 1 || e.buttons === 2) && e.target === containerRef.current) {
+        const dx = e.clientX - panStart.x;
+        const dy = e.clientY - panStart.y;
+        
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+            setIsPanning(true);
+            setHasPanned(true);
+        }
+        
+        if (isPanning) {
+            setOffset({ x: offset.x + dx, y: offset.y + dy });
+            setPanStart({ x: e.clientX, y: e.clientY });
+        }
+        return;
     }
 
     if (!containerRef.current) return;
@@ -657,9 +713,6 @@ export function Canvas() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => {
         e.preventDefault();
-        setSelectedId(null);
-        setSelectedWireIndex(null);
-        setWiringStartNode(null);
       }}
       onClick={() => {
         if (!isPanning && !isInteractingWithComponent.current && !hasPanned) {

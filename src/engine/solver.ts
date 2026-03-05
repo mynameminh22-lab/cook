@@ -165,6 +165,59 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
         addVCCS(comp.nodes[2], comp.nodes[0], comp.nodes[2], comp.nodes[1], gm);
         addCurrentSource(comp.nodes[2], comp.nodes[1], i_offset);
         return;
+      } else if (['and_gate', 'or_gate', 'nand_gate', 'nor_gate', 'xor_gate', 'not_gate'].includes(comp.type)) {
+        // Logic Gate Simulation (Behavioral Model with Output Impedance)
+        const vThresh = 2.5;
+        const vHigh = 5.0;
+        const vLow = 0.0;
+        const rOut = 10; // 10 Ohm output impedance
+        const gOut = 1 / rOut;
+
+        let vOutTarget = vLow;
+        
+        // Get input voltages from PREVIOUS state (propagation delay)
+        const n1 = nodes.find(n => n.id === comp.nodes[0]);
+        const v1 = n1 ? (n1.voltage || 0) : 0;
+        const in1 = v1 > vThresh;
+
+        if (comp.type === 'not_gate') {
+            vOutTarget = !in1 ? vHigh : vLow;
+            // Output is node 1
+            const nOut = comp.nodes[1];
+            // Norton Equivalent: Current Source I = V_target / R_out
+            const iSrc = vOutTarget * gOut;
+            
+            // Add Conductance to Output Node
+            const idx = nodeIndex.get(nOut);
+            if (idx !== undefined) {
+                A.set([idx, idx], A.get([idx, idx]) + gOut);
+                Z.set([idx, 0], Z.get([idx, 0]) + iSrc);
+            }
+        } else {
+            const n2 = nodes.find(n => n.id === comp.nodes[1]);
+            const v2 = n2 ? (n2.voltage || 0) : 0;
+            const in2 = v2 > vThresh;
+            
+            let outState = false;
+            if (comp.type === 'and_gate') outState = in1 && in2;
+            else if (comp.type === 'or_gate') outState = in1 || in2;
+            else if (comp.type === 'nand_gate') outState = !(in1 && in2);
+            else if (comp.type === 'nor_gate') outState = !(in1 || in2);
+            else if (comp.type === 'xor_gate') outState = in1 !== in2;
+            
+            vOutTarget = outState ? vHigh : vLow;
+            
+            // Output is node 2
+            const nOut = comp.nodes[2];
+            const iSrc = vOutTarget * gOut;
+            
+            const idx = nodeIndex.get(nOut);
+            if (idx !== undefined) {
+                A.set([idx, idx], A.get([idx, idx]) + gOut);
+                Z.set([idx, 0], Z.get([idx, 0]) + iSrc);
+            }
+        }
+        return;
       }
 
       addConductance(comp.nodes[0], comp.nodes[1], g);

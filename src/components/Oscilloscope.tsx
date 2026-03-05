@@ -8,6 +8,7 @@ interface DataPoint {
   time: number;
   voltage: number;
   current: number;
+  power: number;
 }
 
 export function Oscilloscope() {
@@ -33,7 +34,9 @@ export function Oscilloscope() {
   const [timeBase, setTimeBase] = useState(5); // Seconds per screen
   const [vScale, setVScale] = useState(10); // Volts per full height (approx)
   const [iScale, setIScale] = useState(1); // Amps per full height (approx)
+  const [pScale, setPScale] = useState(10); // Watts per full height
   const [showControls, setShowControls] = useState(false);
+  const [showPower, setShowPower] = useState(false);
 
   const maxPoints = 1000; 
   const lastTimeRef = useRef(0);
@@ -54,7 +57,8 @@ export function Oscilloscope() {
           { 
             time: time, 
             voltage: selectedComponent.voltageDrop || 0,
-            current: selectedComponent.current || 0
+            current: selectedComponent.current || 0,
+            power: Math.abs((selectedComponent.voltageDrop || 0) * (selectedComponent.current || 0))
           }
         ];
         // Keep enough data for the current timebase plus some buffer
@@ -169,7 +173,27 @@ export function Oscilloscope() {
     }
     ctx.stroke();
 
-  }, [data, timeBase, vScale, iScale]);
+    if (showPower) {
+      // Draw Power (Yellow)
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      started = false;
+      for (const p of data) {
+          if (p.time < startTime) continue;
+          const x = mapX(p.time);
+          const y = mapY(p.power, pScale);
+          if (!started) {
+              ctx.moveTo(x, y);
+              started = true;
+          } else {
+              ctx.lineTo(x, y);
+          }
+      }
+      ctx.stroke();
+    }
+
+  }, [data, timeBase, vScale, iScale, pScale, showPower]);
 
   if (!showOscilloscope) return null;
 
@@ -238,6 +262,27 @@ export function Oscilloscope() {
                   />
                   <div className="text-right text-xs text-blue-400 font-mono">±{(iScale/2).toFixed(1)}A</div>
               </div>
+              <div className="flex items-center justify-between pt-2 border-t border-slate-700">
+                  <label className="text-[10px] text-slate-400 uppercase font-bold">Hiển thị Công suất</label>
+                  <input 
+                    type="checkbox" 
+                    checked={showPower} 
+                    onChange={(e) => setShowPower(e.target.checked)}
+                    className="w-4 h-4 accent-yellow-500"
+                  />
+              </div>
+              {showPower && (
+                <div>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Thang đo công suất (W)</label>
+                    <input 
+                      type="range" min="1" max="100" step="1" 
+                      value={pScale} 
+                      onChange={(e) => setPScale(parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                    />
+                    <div className="text-right text-xs text-yellow-400 font-mono">±{(pScale/2).toFixed(0)}W</div>
+                </div>
+              )}
           </div>
       )}
 
@@ -270,6 +315,14 @@ export function Oscilloscope() {
                          {(selectedComponent.current || 0).toFixed(3)} A
                      </span>
                  </div>
+                 {showPower && (
+                   <div className="flex items-center gap-2 bg-slate-900/60 px-2 py-1 rounded backdrop-blur-sm border border-yellow-500/30">
+                       <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                       <span className="text-xs text-yellow-400 font-mono font-bold">
+                           {Math.abs((selectedComponent.voltageDrop || 0) * (selectedComponent.current || 0)).toFixed(2)} W
+                       </span>
+                   </div>
+                 )}
              </div>
              <div className="absolute bottom-1 right-2 text-[10px] text-slate-600 font-mono">
                  {selectedComponent.type} ({selectedComponent.id.slice(0,4)})

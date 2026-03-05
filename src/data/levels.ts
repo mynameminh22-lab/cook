@@ -5,6 +5,7 @@ export interface Level {
   id: number;
   title: string;
   description: string;
+  principle?: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   category?: 'basic' | 'repair' | 'build';
   maxScore: number;
@@ -28,15 +29,6 @@ function createBaseState(components: Component[]): CircuitState {
     offset: { x: 0, y: 0 },
     evaluationResult: null,
     levelProgress: {},
-    selectedId: null,
-    selectedWireIndex: null,
-    wireMode: 'curved',
-    snapToGrid: true,
-    showOscilloscope: false,
-    showUI: true,
-    shortCircuitWarning: false,
-    past: [],
-    future: []
   };
 }
 
@@ -783,6 +775,41 @@ export const LEVELS: Level[] = [
     checkWin: (state) => {
       const leds = state.components.filter(c => c.type === 'led');
       return leds.length === 2 && !state.shortCircuitWarning;
+    }
+  },
+  {
+    id: 31,
+    title: "31. SR Flip-Flop (NAND)",
+    description: "Tạo mạch chốt SR bằng 2 cổng NAND. Khi S=0, Q=1. Khi R=0, Q=0.",
+    principle: "SR Flip-Flop là mạch nhớ cơ bản trong kỹ thuật số, sử dụng phản hồi để duy trì trạng thái.",
+    difficulty: 'Hard',
+    maxScore: 100,
+    setup: () => createBaseState([
+      spawn('nand_gate', 300, 200),
+      spawn('nand_gate', 300, 400),
+      spawn('battery', 100, 300, 5)
+    ]),
+    checkWin: (state) => {
+      const gates = state.components.filter(c => c.type === 'nand_gate');
+      return gates.length >= 2;
+    }
+  },
+  {
+    id: 32,
+    title: "32. Half Adder (Bộ cộng bán phần)",
+    description: "Tạo bộ cộng bán phần dùng cổng XOR và AND.",
+    principle: "Half Adder cộng 2 bit A và B, cho ra tổng S và nhớ C.",
+    difficulty: 'Hard',
+    maxScore: 100,
+    setup: () => createBaseState([
+      spawn('xor_gate', 300, 200),
+      spawn('and_gate', 300, 400),
+      spawn('battery', 100, 300, 5)
+    ]),
+    checkWin: (state) => {
+      const xor = state.components.find(c => c.type === 'xor_gate');
+      const and = state.components.find(c => c.type === 'and_gate');
+      return !!xor && !!and;
     }
   }
 ];
