@@ -1,4 +1,15 @@
-export type ComponentType = 'resistor' | 'battery' | 'lamp' | 'wire' | 'ground' | 'switch' | 'push_button' | 'spdt_switch' | 'voltmeter' | 'ammeter' | 'potentiometer' | 'fuse' | 'led' | 'text' | 'capacitor' | 'inductor' | 'diode' | 'ac_source' | 'npn_transistor' | 'pnp_transistor' | 'opamp' | 'and_gate' | 'or_gate' | 'not_gate' | 'nand_gate' | 'nor_gate' | 'xor_gate' | 'seven_segment';
+export type ComponentType = 'resistor' | 'battery' | 'lamp' | 'wire' | 'ground' | 'switch' | 'push_button' | 'spdt_switch' | 'voltmeter' | 'ammeter' | 'multimeter' | 'wattmeter' | 'potentiometer' | 'fuse' | 'led' | 'text' | 'capacitor' | 'inductor' | 'diode' | 'ac_source' | 'npn_transistor' | 'pnp_transistor' | 'opamp' | 'and_gate' | 'or_gate' | 'not_gate' | 'nand_gate' | 'nor_gate' | 'xor_gate' | 'seven_segment' | 'clock' | 'solar_panel' | 'wind_turbine' | 'thermoelectric_generator';
+
+export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'stormy';
+
+export interface EnvironmentState {
+  timeOfDay: number; // 0 to 24 hours
+  weather: WeatherType;
+  temperature: number; // Celsius
+  windSpeed: number; // m/s
+  isSimulationEnabled: boolean;
+  timeSpeed: number; // Multiplier
+}
 
 export interface Point {
   x: number;
@@ -27,6 +38,7 @@ export interface Component {
   text?: string; // For text components
   color?: string; // For LED color or wire color
   rating?: number; // For fuse current rating
+  mode?: 'voltage' | 'current' | 'resistance'; // For multimeter
   maxPower?: number; // Maximum power dissipation (W)
   maxVoltage?: number; // Maximum voltage rating (V)
   maxCurrent?: number; // Maximum current rating (A)
@@ -47,6 +59,13 @@ export interface LevelProgress {
   completed: boolean;
 }
 
+export interface CircuitExampleInfo {
+  name: string;
+  description?: string;
+  principle?: string;
+  application?: string;
+}
+
 export interface CircuitState {
   components: Component[];
   nodes: Node[];
@@ -58,4 +77,6 @@ export interface CircuitState {
   shortCircuitWarning?: boolean;
   evaluationResult: EvaluationResult | null;
   levelProgress: Record<number, LevelProgress>; // Level ID -> Progress
+  currentExample: CircuitExampleInfo | null;
+  environment: EnvironmentState;
 }

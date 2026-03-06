@@ -177,5 +177,32 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     principle: 'Khuếch đại hiệu điện thế giữa hai đầu vào: V_out = A * (V_+ - V_-).',
     formula: 'V_out = A * (V_+ - V_-)',
     usage: 'Khuếch đại, so sánh, tích phân, vi phân, lọc tích cực.'
+  },
+  {
+    type: 'solar_panel',
+    title: 'Pin mặt trời (Solar Panel)',
+    icon: Sun,
+    description: 'Thiết bị chuyển đổi quang năng thành điện năng.',
+    principle: 'Hiệu ứng quang điện: Các photon ánh sáng đập vào bề mặt bán dẫn, giải phóng electron tạo ra dòng điện. Hiệu suất phụ thuộc vào cường độ ánh sáng (thời gian trong ngày và thời tiết).',
+    formula: 'P = I * V (Phụ thuộc vào cường độ sáng)',
+    usage: 'Cung cấp năng lượng sạch từ ánh sáng mặt trời.'
+  },
+  {
+    type: 'wind_turbine',
+    title: 'Tuabin gió (Wind Turbine)',
+    icon: Waves,
+    description: 'Thiết bị chuyển đổi động năng của gió thành điện năng.',
+    principle: 'Gió làm quay cánh quạt, truyền động năng cho máy phát điện để tạo ra dòng điện. Điện áp đầu ra phụ thuộc vào tốc độ gió.',
+    formula: 'P = 1/2 * ρ * A * v³ (Công suất tỷ lệ với lập phương tốc độ gió)',
+    usage: 'Sản xuất điện từ năng lượng gió.'
+  },
+  {
+    type: 'thermoelectric_generator',
+    title: 'Máy phát nhiệt điện (TEG)',
+    icon: Activity,
+    description: 'Thiết bị chuyển đổi sự chênh lệch nhiệt độ thành điện năng.',
+    principle: 'Hiệu ứng Seebeck: Sự chênh lệch nhiệt độ giữa hai mặt của vật liệu bán dẫn tạo ra một hiệu điện thế.',
+    formula: 'V = α * ΔT (Điện áp tỷ lệ với chênh lệch nhiệt độ)',
+    usage: 'Tận dụng nhiệt thừa để phát điện, cấp nguồn cho cảm biến ở môi trường khắc nghiệt.'
   }
 ];

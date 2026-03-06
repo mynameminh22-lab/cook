@@ -99,6 +99,15 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
           <path d="M 22 32 Q 27 22 32 32 T 42 32" fill="none" stroke="#1e293b" strokeWidth="2" />
         </svg>
       )}
+      {type === 'clock' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <rect x="16" y="16" width="32" height="32" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="2" />
+          <path d="M 22 40 L 22 24 L 32 24 L 32 40 L 42 40 L 42 24" fill="none" stroke="#ef4444" strokeWidth="2" />
+        </svg>
+      )}
+
       {type === 'battery' && (
         <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
           <line x1="32" y1="0" x2="32" y2="16" stroke="#1e293b" strokeWidth="2" />
@@ -158,6 +167,30 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
           <text x="32" y="46" fontSize="8" fill="#3b82f6" textAnchor="middle" fontWeight="bold">{Math.abs(component.current).toFixed(2)}A</text>
         </svg>
       )}
+      {type === 'multimeter' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <rect x="16" y="16" width="32" height="32" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="2" />
+          <rect x="20" y="20" width="24" height="12" rx="2" fill="#a7f3d0" stroke="#064e3b" strokeWidth="1" />
+          <text x="32" y="29" fontSize="8" fill="#064e3b" textAnchor="middle" fontWeight="bold" fontFamily="monospace">
+            {component.mode === 'current' ? `${Math.abs(component.current).toFixed(2)}A` :
+             component.mode === 'resistance' ? (Math.abs(component.current) > 1e-6 ? `${(Math.abs(component.voltageDrop) / Math.abs(component.current)).toFixed(1)}Ω` : 'O.L') :
+             `${Math.abs(component.voltageDrop).toFixed(1)}V`}
+          </text>
+          <circle cx="24" cy="40" r="3" fill="#ef4444" />
+          <circle cx="40" cy="40" r="3" fill="#1e293b" />
+        </svg>
+      )}
+      {type === 'wattmeter' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <circle cx="32" cy="32" r="16" fill="white" stroke="#1e293b" strokeWidth="2" />
+          <text x="32" y="36" fontSize="12" fill="#1e293b" textAnchor="middle" fontWeight="bold">W</text>
+          <text x="32" y="46" fontSize="8" fill="#eab308" textAnchor="middle" fontWeight="bold">{Math.abs(component.voltageDrop * component.current).toFixed(1)}W</text>
+        </svg>
+      )}
       
       {type === 'potentiometer' && (
         <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
@@ -204,6 +237,86 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
         <div className="whitespace-nowrap font-sans text-slate-800 font-medium select-none pointer-events-none">
            {component.text || 'Text'}
         </div>
+      )}
+
+      {type === 'seven_segment' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+          <rect x="10" y="4" width="44" height="56" rx="4" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+          
+          {/* Segments */}
+          {(() => {
+             // Decode BCD
+             // Nodes: 0=A, 1=B, 2=C, 3=D, 4=Com
+             // Actually, we need to access node voltages.
+             // But ComponentVisual only receives 'component'.
+             // We need to pass node voltages or calculate value in solver/store.
+             // Let's assume 'component.value' stores the decoded number?
+             // No, solver updates component.
+             // But solver doesn't know about 7-segment logic yet.
+             // We should update solver to calculate the 'value' (0-15) based on inputs.
+             // OR we can pass nodes to ComponentVisual? No, it only gets Component.
+             // We can use component.value to store the displayed number.
+             
+             // Let's assume component.value holds the integer 0-15.
+             const val = Math.round(component.value || 0);
+             
+             // Segments: a, b, c, d, e, f, g
+             // 0: 1111110
+             // 1: 0110000
+             // ...
+             const segments = [
+               0x7E, // 0
+               0x30, // 1
+               0x6D, // 2
+               0x79, // 3
+               0x33, // 4
+               0x5B, // 5
+               0x5F, // 6
+               0x70, // 7
+               0x7F, // 8
+               0x7B, // 9
+               0x77, // A
+               0x1F, // b
+               0x4E, // C
+               0x3D, // d
+               0x4F, // E
+               0x47  // F
+             ];
+             
+             const mask = segments[val & 0xF] || 0;
+             const onColor = "#ef4444";
+             const offColor = "#334155";
+             
+             const getFill = (bit: number) => (mask & (1 << bit)) ? onColor : offColor;
+             const getGlow = (bit: number) => (mask & (1 << bit)) ? "drop-shadow(0 0 2px #ef4444)" : "";
+
+             return (
+               <g transform="translate(32, 32) scale(0.8) translate(-32, -32)">
+                 {/* a (top) */}
+                 <path d="M 16 8 L 48 8 L 44 12 L 20 12 Z" fill={getFill(6)} style={{filter: getGlow(6)}} />
+                 {/* b (top-right) */}
+                 <path d="M 48 8 L 52 12 L 52 30 L 48 32 L 44 28 L 44 12 Z" fill={getFill(5)} style={{filter: getGlow(5)}} />
+                 {/* c (bottom-right) */}
+                 <path d="M 48 32 L 52 34 L 52 52 L 48 56 L 44 52 L 44 36 Z" fill={getFill(4)} style={{filter: getGlow(4)}} />
+                 {/* d (bottom) */}
+                 <path d="M 16 56 L 48 56 L 44 52 L 20 52 Z" fill={getFill(3)} style={{filter: getGlow(3)}} />
+                 {/* e (bottom-left) */}
+                 <path d="M 16 56 L 12 52 L 12 34 L 16 32 L 20 36 L 20 52 Z" fill={getFill(2)} style={{filter: getGlow(2)}} />
+                 {/* f (top-left) */}
+                 <path d="M 16 32 L 12 30 L 12 12 L 16 8 L 20 12 L 20 28 Z" fill={getFill(1)} style={{filter: getGlow(1)}} />
+                 {/* g (middle) */}
+                 <path d="M 16 32 L 20 28 L 44 28 L 48 32 L 44 36 L 20 36 Z" fill={getFill(0)} style={{filter: getGlow(0)}} />
+               </g>
+             );
+          })()}
+          
+          {/* Pins */}
+          <line x1="0" y1="17" x2="10" y2="17" stroke="#94a3b8" strokeWidth="2" /> {/* A */}
+          <line x1="0" y1="27" x2="10" y2="27" stroke="#94a3b8" strokeWidth="2" /> {/* B */}
+          <line x1="0" y1="37" x2="10" y2="37" stroke="#94a3b8" strokeWidth="2" /> {/* C */}
+          <line x1="0" y1="47" x2="10" y2="47" stroke="#94a3b8" strokeWidth="2" /> {/* D */}
+          <line x1="32" y1="60" x2="32" y2="64" stroke="#94a3b8" strokeWidth="2" /> {/* Com */}
+        </svg>
       )}
 
       {type === 'npn_transistor' && (
@@ -665,17 +778,24 @@ export function Canvas() {
     setLastTouchDistance(null);
   };
 
-  const handleNodeClick = (e: React.MouseEvent | React.TouchEvent, nodeId: string) => {
+  const handleNodePointerDown = (e: React.PointerEvent, nodeId: string) => {
     e.stopPropagation();
-    // Prevent double firing if both events exist?
-    // React usually handles this, but let's be safe.
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     
-    if (wiringStartNode === null) {
-      setWiringStartNode(nodeId);
+    if (wiringStartNode === nodeId) {
+      setWiringStartNode(null);
+    } else if (wiringStartNode) {
+      connectNodes(wiringStartNode, nodeId);
+      setWiringStartNode(null);
     } else {
-      if (wiringStartNode !== nodeId) {
-        connectNodes(wiringStartNode, nodeId);
-      }
+      setWiringStartNode(nodeId);
+    }
+  };
+
+  const handleNodePointerUp = (e: React.PointerEvent, nodeId: string) => {
+    e.stopPropagation();
+    if (wiringStartNode && wiringStartNode !== nodeId) {
+      connectNodes(wiringStartNode, nodeId);
       setWiringStartNode(null);
     }
   };
@@ -813,22 +933,22 @@ export function Canvas() {
                   <path
                     d={pathD}
                     stroke="#fbbf24"
-                    strokeWidth="6"
-                    strokeOpacity="0.3"
+                    strokeWidth={Math.min(12, 4 + Math.abs(current) * 2)}
+                    strokeOpacity={Math.min(0.8, 0.2 + Math.abs(current) * 0.1)}
                     fill="none"
                     filter="url(#wire-glow)"
-                    className="pointer-events-none"
+                    className="pointer-events-none transition-all duration-300"
                   />
                   <path
                     d={pathD}
                     stroke="#fbbf24" // Electron color (yellow)
-                    strokeWidth="4"
+                    strokeWidth="3"
                     fill="none"
-                    strokeDasharray="4 16" // Dot size 4, gap 16
+                    strokeDasharray="6 14" // Dot size 6, gap 14
                     style={{
                       animation: `wire-flow ${duration}s linear infinite ${direction}`
                     }}
-                    className="opacity-80"
+                    className="opacity-90"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -927,8 +1047,8 @@ export function Canvas() {
             left: node.position.x,
             top: node.position.y
           }}
-          onClick={(e) => handleNodeClick(e, node.id)}
-          onTouchEnd={(e) => handleNodeClick(e, node.id)}
+          onPointerDown={(e) => handleNodePointerDown(e, node.id)}
+          onPointerUp={(e) => handleNodePointerUp(e, node.id)}
           title={`Voltage: ${node.voltage?.toFixed(2)}V`}
         />
       ))}

@@ -90,6 +90,8 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
             selectedComponent.type === 'ground' ? 'Nối đất' :
             selectedComponent.type === 'voltmeter' ? 'Vôn kế' :
             selectedComponent.type === 'ammeter' ? 'Ampe kế' :
+            selectedComponent.type === 'multimeter' ? 'Đồng hồ vạn năng' :
+            selectedComponent.type === 'wattmeter' ? 'Công tơ mét' :
             selectedComponent.type === 'potentiometer' ? 'Biến trở' :
             selectedComponent.type === 'fuse' ? 'Cầu chì' :
             selectedComponent.type === 'led' ? 'Đèn LED' :
@@ -101,6 +103,11 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
             selectedComponent.type === 'npn_transistor' ? 'Transistor NPN' :
             selectedComponent.type === 'pnp_transistor' ? 'Transistor PNP' :
             selectedComponent.type === 'opamp' ? 'Op-Amp' :
+            selectedComponent.type === 'clock' ? 'Nguồn xung' :
+            selectedComponent.type === 'solar_panel' ? 'Pin mặt trời' :
+            selectedComponent.type === 'wind_turbine' ? 'Tuabin gió' :
+            selectedComponent.type === 'thermoelectric_generator' ? 'Máy phát nhiệt điện' :
+            selectedComponent.type === 'seven_segment' ? 'LED 7 Đoạn' :
             selectedComponent.type}
             </div>
         </div>
@@ -115,12 +122,12 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
 
       <div className="p-5 space-y-5">
         {/* Value Input */}
-        {(selectedComponent.type === 'resistor' || selectedComponent.type === 'battery' || selectedComponent.type === 'lamp' || selectedComponent.type === 'potentiometer' || selectedComponent.type === 'led' || selectedComponent.type === 'capacitor' || selectedComponent.type === 'inductor' || selectedComponent.type === 'diode' || selectedComponent.type === 'ac_source' || selectedComponent.type === 'npn_transistor' || selectedComponent.type === 'pnp_transistor' || selectedComponent.type === 'opamp') && (
+        {(selectedComponent.type === 'resistor' || selectedComponent.type === 'battery' || selectedComponent.type === 'lamp' || selectedComponent.type === 'potentiometer' || selectedComponent.type === 'led' || selectedComponent.type === 'capacitor' || selectedComponent.type === 'inductor' || selectedComponent.type === 'diode' || selectedComponent.type === 'ac_source' || selectedComponent.type === 'clock' || selectedComponent.type === 'npn_transistor' || selectedComponent.type === 'pnp_transistor' || selectedComponent.type === 'opamp' || selectedComponent.type === 'solar_panel' || selectedComponent.type === 'wind_turbine' || selectedComponent.type === 'thermoelectric_generator') && (
           <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
             <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
               {selectedComponent.type === 'resistor' || selectedComponent.type === 'potentiometer' ? 'Điện trở (Ω)' :
-               selectedComponent.type === 'battery' ? 'Điện áp (V)' :
-               selectedComponent.type === 'ac_source' ? 'Điện áp đỉnh (V)' :
+               selectedComponent.type === 'battery' || selectedComponent.type === 'solar_panel' || selectedComponent.type === 'wind_turbine' || selectedComponent.type === 'thermoelectric_generator' ? 'Điện áp tối đa (V)' :
+               selectedComponent.type === 'ac_source' || selectedComponent.type === 'clock' ? 'Điện áp đỉnh (V)' :
                selectedComponent.type === 'capacitor' ? 'Điện dung (F)' :
                selectedComponent.type === 'inductor' ? 'Độ tự cảm (H)' :
                selectedComponent.type === 'diode' ? 'Điện áp rơi (V)' :
@@ -135,12 +142,12 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
               onChange={handleChange}
               className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
             />
-            {(selectedComponent.type === 'resistor' || selectedComponent.type === 'potentiometer' || selectedComponent.type === 'battery') && (
+            {(selectedComponent.type === 'resistor' || selectedComponent.type === 'potentiometer' || selectedComponent.type === 'battery' || selectedComponent.type === 'solar_panel' || selectedComponent.type === 'wind_turbine' || selectedComponent.type === 'thermoelectric_generator') && (
                 <input 
                     type="range" 
                     min="0" 
-                    max={selectedComponent.type === 'battery' ? 24 : 10000} 
-                    step={selectedComponent.type === 'battery' ? 0.5 : 10}
+                    max={['battery', 'solar_panel', 'wind_turbine', 'thermoelectric_generator'].includes(selectedComponent.type) ? 24 : 10000} 
+                    step={['battery', 'solar_panel', 'wind_turbine', 'thermoelectric_generator'].includes(selectedComponent.type) ? 0.5 : 10}
                     value={selectedComponent.value}
                     onChange={handleChange}
                     className="w-full mt-3 accent-blue-600 cursor-pointer"
@@ -149,18 +156,36 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
           </div>
         )}
 
-        {/* Frequency Input for AC Source */}
-        {selectedComponent.type === 'ac_source' && (
+        {/* Frequency Input for AC Source and Clock */}
+        {(selectedComponent.type === 'ac_source' || selectedComponent.type === 'clock') && (
           <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
             <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
               Tần số (Hz)
             </label>
             <input
               type="number"
-              value={selectedComponent.rating || 50}
+              value={selectedComponent.rating || (selectedComponent.type === 'clock' ? 1 : 50)}
               onChange={handleRatingChange}
               className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
             />
+          </div>
+        )}
+
+        {/* Multimeter Mode Selector */}
+        {selectedComponent.type === 'multimeter' && (
+          <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+              Chế độ đo
+            </label>
+            <select
+              value={selectedComponent.mode || 'voltage'}
+              onChange={(e) => updateComponent(selectedComponent.id, { mode: e.target.value as 'voltage' | 'current' | 'resistance' })}
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
+            >
+              <option value="voltage">Đo Điện áp (V)</option>
+              <option value="current">Đo Dòng điện (A)</option>
+              <option value="resistance">Đo Điện trở (Ω)</option>
+            </select>
           </div>
         )}
 
@@ -253,12 +278,19 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
                         {selectedComponent.isBroken ? "Đã hỏng" : "Bình thường"}
                     </span>
                 </div>
-                {selectedComponent.isBroken && (
+                {selectedComponent.isBroken ? (
                     <button 
                         onClick={() => updateComponent(selectedComponent.id, { isBroken: false })}
                         className="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-center font-bold shadow-sm transition-colors"
                     >
                         Sửa chữa linh kiện
+                    </button>
+                ) : (
+                    <button 
+                        onClick={() => updateComponent(selectedComponent.id, { isBroken: true })}
+                        className="mt-3 w-full px-3 py-2 bg-slate-100 text-slate-600 border border-slate-200 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-center font-bold shadow-sm transition-colors text-xs"
+                    >
+                        Gây hỏng (Mô phỏng lỗi)
                     </button>
                 )}
                 {selectedComponent.isBroken && (
@@ -297,7 +329,7 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
             </span>
           </div>
           <div className="flex justify-between text-sm items-center">
-            <span className="text-slate-400 font-medium">Hiệu điện thế:</span>
+            <span className="text-slate-400 font-medium">Điện áp:</span>
             <span className="font-mono font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/20">
               {selectedComponent.voltageDrop.toFixed(2)} V
             </span>

@@ -4,7 +4,7 @@ import { ComponentType } from '../types';
 import { 
   Battery, Zap, Lightbulb, Activity, ToggleLeft, Gauge, Search, Sliders, ZapOff, Sun, Type, 
   ArrowDownToLine, CircleDot, GitBranch, ChevronDown, ChevronRight,
-  Radio, Cpu, ArrowRightToLine, Waves, Share2, Triangle, Binary
+  Radio, Cpu, ArrowRightToLine, Waves, Share2, Triangle, Binary, Clock, Hash, Wind, ThermometerSun
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -14,6 +14,10 @@ const COMPONENT_GROUPS = [
     items: [
       { type: 'battery', label: 'Pin (DC)', icon: Battery },
       { type: 'ac_source', label: 'Nguồn xoay chiều (AC)', icon: Waves },
+      { type: 'clock', label: 'Nguồn xung (Clock)', icon: Clock },
+      { type: 'solar_panel', label: 'Pin mặt trời', icon: Sun },
+      { type: 'wind_turbine', label: 'Tuabin gió', icon: Wind },
+      { type: 'thermoelectric_generator', label: 'Máy phát nhiệt điện', icon: ThermometerSun },
       { type: 'ground', label: 'Nối đất (GND)', icon: ArrowDownToLine },
     ]
   },
@@ -60,6 +64,7 @@ const COMPONENT_GROUPS = [
     items: [
       { type: 'lamp', label: 'Bóng đèn', icon: Lightbulb },
       { type: 'led', label: 'Đèn LED', icon: Sun },
+      { type: 'seven_segment', label: 'LED 7 Đoạn (BCD)', icon: Hash },
     ]
   },
   {
@@ -67,6 +72,8 @@ const COMPONENT_GROUPS = [
     items: [
       { type: 'voltmeter', label: 'Vôn kế', icon: Gauge },
       { type: 'ammeter', label: 'Ampe kế', icon: Search },
+      { type: 'multimeter', label: 'Đồng hồ vạn năng', icon: Activity },
+      { type: 'wattmeter', label: 'Công tơ mét', icon: Zap },
     ]
   },
   {

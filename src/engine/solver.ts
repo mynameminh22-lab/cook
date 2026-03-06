@@ -13,7 +13,7 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
   let hasShortCircuit = false;
 
   // 2. Build MNA Matrix
-  const voltageSources = components.filter(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'opamp');
+  const voltageSources = components.filter(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'opamp' || c.type === 'clock' || c.type === 'solar_panel' || c.type === 'wind_turbine' || c.type === 'thermoelectric_generator');
   const m = voltageSources.length;
   const matrixSize = n + m;
 
@@ -69,7 +69,7 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
 
   // Components Conductance
   components.forEach(comp => {
-    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode', 'npn_transistor', 'pnp_transistor'].includes(comp.type)) {
+    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'multimeter', 'wattmeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode', 'npn_transistor', 'pnp_transistor', 'seven_segment'].includes(comp.type)) {
       let resistance = comp.value;
       let g = 0;
       let i_src = 0;
@@ -77,14 +77,20 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
       // Enforce minimum resistance for passive components
       if (['resistor', 'lamp', 'potentiometer'].includes(comp.type)) {
         resistance = Math.max(resistance, 0.1);
+        if (comp.type === 'resistor') {
+          // Temperature coefficient of resistance (alpha ~ 0.004 for some metals, let's use 0.002 for noticeable effect)
+          const alpha = 0.002;
+          const currentTemp = comp.temperature || 25;
+          resistance = resistance * (1 + alpha * (currentTemp - 25));
+        }
         g = 1 / resistance;
       } else if (comp.type === 'fuse') {
         resistance = comp.isBroken ? 1e9 : Math.max(comp.value, 0.01);
         g = 1 / resistance;
-      } else if (comp.type === 'voltmeter') {
+      } else if (comp.type === 'voltmeter' || (comp.type === 'multimeter' && comp.mode !== 'current')) {
         resistance = 10e6;
         g = 1 / resistance;
-      } else if (comp.type === 'ammeter') {
+      } else if (comp.type === 'ammeter' || comp.type === 'wattmeter' || (comp.type === 'multimeter' && comp.mode === 'current')) {
         resistance = 1e-3;
         g = 1 / resistance;
       } else if (comp.type === 'switch' || comp.type === 'push_button') {
@@ -165,6 +171,17 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
         addVCCS(comp.nodes[2], comp.nodes[0], comp.nodes[2], comp.nodes[1], gm);
         addCurrentSource(comp.nodes[2], comp.nodes[1], i_offset);
         return;
+      } else if (comp.type === 'seven_segment') {
+        // High impedance inputs (like voltmeter)
+        // Add small conductance to ground/common for stability?
+        // Let's treat inputs as open circuit (infinite resistance)
+        // But to be safe for solver, maybe 1G Ohm to Common?
+        const g_leak = 1e-9;
+        addConductance(comp.nodes[0], comp.nodes[4], g_leak); // A to Com
+        addConductance(comp.nodes[1], comp.nodes[4], g_leak); // B to Com
+        addConductance(comp.nodes[2], comp.nodes[4], g_leak); // C to Com
+        addConductance(comp.nodes[3], comp.nodes[4], g_leak); // D to Com
+        return;
       } else if (['and_gate', 'or_gate', 'nand_gate', 'nor_gate', 'xor_gate', 'not_gate'].includes(comp.type)) {
         // Logic Gate Simulation (Behavioral Model with Output Impedance)
         const vThresh = 2.5;
@@ -228,9 +245,18 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
   });
 
   // Wires Conductance (High conductance = Low resistance)
-  const WIRE_CONDUCTANCE = 1000; // 0.001 Ohm
   wires.forEach(wire => {
-    addConductance(wire.from, wire.to, WIRE_CONDUCTANCE);
+    const n1 = nodes.find(n => n.id === wire.from);
+    const n2 = nodes.find(n => n.id === wire.to);
+    let resistance = 0.001; // Default
+    if (n1 && n2) {
+      const dx = n1.position.x - n2.position.x;
+      const dy = n1.position.y - n2.position.y;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      // Assume 0.0001 Ohm per pixel
+      resistance = Math.max(0.001, length * 0.0001);
+    }
+    addConductance(wire.from, wire.to, 1 / resistance);
   });
 
     // Voltage Sources
@@ -279,6 +305,37 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
         // AC Source: V = V_peak * sin(2 * pi * f * t)
         const f = source.rating || 50; // Default 50Hz
         v_val = source.value * Math.sin(2 * Math.PI * f * time);
+      } else if (source.type === 'clock') {
+        // Clock: Square wave 0V to V_peak
+        const v_peak = source.value || 5; // Voltage level (default 5V)
+        const f = source.rating || 1; // Frequency in Hz
+        // Period T = 1/f. High for T/2.
+        // phase = (time * f) % 1. If < 0.5 -> High.
+        const phase = (time * f) % 1;
+        v_val = phase < 0.5 ? v_peak : 0;
+      } else if (source.type === 'solar_panel') {
+        const env = state.environment;
+        let sunlight = 0;
+        // Day is 6:00 to 18:00
+        if (env.timeOfDay > 6 && env.timeOfDay < 18) {
+          sunlight = Math.sin(((env.timeOfDay - 6) / 12) * Math.PI);
+        }
+        if (env.weather === 'cloudy') sunlight *= 0.5;
+        if (env.weather === 'rainy') sunlight *= 0.2;
+        if (env.weather === 'stormy') sunlight *= 0.1;
+        v_val = source.value * sunlight;
+      } else if (source.type === 'wind_turbine') {
+        const env = state.environment;
+        let windFactor = Math.min(1, env.windSpeed / 15); // Max output at 15 m/s
+        if (env.weather === 'stormy') windFactor = Math.min(1, windFactor * 1.5);
+        v_val = source.value * windFactor;
+      } else if (source.type === 'thermoelectric_generator') {
+        const env = state.environment;
+        // Output depends on temperature difference. Let's say max output at 100C diff.
+        // Just a simple model: higher temp = more voltage, or just random fluctuation based on temp.
+        // Let's say it generates voltage based on ambient temp vs 0.
+        let tempFactor = Math.min(1, Math.max(0, (env.temperature - 20) / 80));
+        v_val = source.value * tempFactor;
       }
 
       Z.set([idx, 0], v_val);
@@ -336,16 +393,21 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
     let current = 0;
     let isBroken = comp.isBroken;
 
-    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode'].includes(comp.type)) {
+    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'multimeter', 'wattmeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode'].includes(comp.type)) {
       let resistance = comp.value;
       
       if (['resistor', 'lamp', 'potentiometer'].includes(comp.type)) {
         resistance = Math.max(resistance, 0.1);
+        if (comp.type === 'resistor') {
+          const alpha = 0.002;
+          const currentTemp = comp.temperature || 25;
+          resistance = resistance * (1 + alpha * (currentTemp - 25));
+        }
       } else if (comp.type === 'fuse') {
         resistance = comp.isBroken ? 1e9 : Math.max(comp.value, 0.01);
-      } else if (comp.type === 'voltmeter') {
+      } else if (comp.type === 'voltmeter' || (comp.type === 'multimeter' && comp.mode !== 'current')) {
         resistance = 10e6;
-      } else if (comp.type === 'ammeter') {
+      } else if (comp.type === 'ammeter' || comp.type === 'wattmeter' || (comp.type === 'multimeter' && comp.mode === 'current')) {
         resistance = 1e-3;
       } else if (comp.type === 'switch' || comp.type === 'push_button') {
         resistance = comp.isOpen ? 1e9 : 1e-3;
@@ -426,6 +488,35 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
             const nOut = newNodes.find(n => n.id === comp.nodes[2]);
             vDrop = nOut ? nOut.voltage : 0;
         }
+      } else if (comp.type === 'seven_segment') {
+        const nA = newNodes.find(n => n.id === comp.nodes[0]);
+        const nB = newNodes.find(n => n.id === comp.nodes[1]);
+        const nC = newNodes.find(n => n.id === comp.nodes[2]);
+        const nD = newNodes.find(n => n.id === comp.nodes[3]);
+        const nCom = newNodes.find(n => n.id === comp.nodes[4]);
+        
+        if (nA && nB && nC && nD && nCom) {
+            const vCom = nCom.voltage;
+            const vA = nA.voltage - vCom;
+            const vB = nB.voltage - vCom;
+            const vC = nC.voltage - vCom;
+            const vD = nD.voltage - vCom;
+
+            // Logic threshold 2.5V
+            const bitA = vA > 2.5 ? 1 : 0;
+            const bitB = vB > 2.5 ? 1 : 0;
+            const bitC = vC > 2.5 ? 1 : 0;
+            const bitD = vD > 2.5 ? 1 : 0;
+
+            const val = bitA + bitB * 2 + bitC * 4 + bitD * 8;
+            
+            if (comp.value !== val) {
+                componentsChanged = true;
+                return { ...comp, value: val, current: 0, voltageDrop: 0 };
+            }
+        }
+        current = 0;
+        vDrop = 0;
       } else {
         // Calculate current for 2-terminal components
         current = vDrop / Math.max(resistance, 1e-9);
@@ -463,12 +554,28 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
           else if (comp.type === 'lamp') {
               if (Math.abs(vDrop) > (comp.maxVoltage || 18)) isBroken = true;
           }
+          // Capacitor Overvoltage
+          else if (comp.type === 'capacitor') {
+              if (Math.abs(vDrop) > (comp.maxVoltage || 50)) isBroken = true;
+          }
+          // Diode Overcurrent
+          else if (comp.type === 'diode') {
+              if (Math.abs(current) > (comp.maxCurrent || 1)) isBroken = true;
+          }
+          // Transistor Overcurrent/Overpower
+          else if (comp.type === 'npn_transistor' || comp.type === 'pnp_transistor') {
+              if (Math.abs(current) > (comp.maxCurrent || 0.5) || power > (comp.maxPower || 0.6)) isBroken = true;
+          }
+          // Generator Overcurrent
+          else if (['solar_panel', 'wind_turbine', 'thermoelectric_generator'].includes(comp.type)) {
+              if (Math.abs(current) > (comp.maxCurrent || 5)) isBroken = true;
+          }
           
           // Thermal Runaway / Overheat
           if (temp > 150) isBroken = true; // General overheat limit
       }
 
-    } else if (comp.type === 'battery') {
+    } else if (comp.type === 'battery' || comp.type === 'ac_source' || comp.type === 'clock' || comp.type === 'solar_panel' || comp.type === 'wind_turbine' || comp.type === 'thermoelectric_generator') {
       // For battery, we need to find the current variable in the solution vector X
       // The voltage sources are appended after the nodes in the matrix
       // We need to find the index of this battery in the voltageSources array
@@ -494,7 +601,7 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
 
     // Recalculate temp for battery/source if needed, but for now just default
     let finalTemp = typeof temp !== 'undefined' ? temp : 25;
-    if (comp.type === 'battery' || comp.type === 'ac_source') {
+    if (comp.type === 'battery' || comp.type === 'ac_source' || comp.type === 'clock' || comp.type === 'solar_panel' || comp.type === 'wind_turbine' || comp.type === 'thermoelectric_generator') {
          const ambientTemp = 25;
          const power = Math.abs(current * vDrop); // Power delivered/absorbed
          const thermalRes = 5;
@@ -519,8 +626,14 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
     const n2 = newNodes.find(n => n.id === wire.to);
     if (!n1 || !n2) return wire;
     
+    let resistance = 0.001;
+    const dx = n1.position.x - n2.position.x;
+    const dy = n1.position.y - n2.position.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    resistance = Math.max(0.001, length * 0.0001);
+
     const vDrop = n1.voltage - n2.voltage;
-    const current = vDrop * WIRE_CONDUCTANCE;
+    const current = vDrop / resistance;
     
     if (Math.abs((wire.current || 0) - current) > 1e-6) {
       wiresChanged = true;

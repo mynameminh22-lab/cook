@@ -37,6 +37,9 @@ export function Oscilloscope() {
   const [pScale, setPScale] = useState(10); // Watts per full height
   const [showControls, setShowControls] = useState(false);
   const [showPower, setShowPower] = useState(false);
+  const [triggerMode, setTriggerMode] = useState<'none' | 'rising' | 'falling'>('none');
+  const [triggerLevel, setTriggerLevel] = useState(0);
+  const [cursorPos, setCursorPos] = useState<{x: number, y: number} | null>(null);
 
   const maxPoints = 1000; 
   const lastTimeRef = useRef(0);
@@ -62,8 +65,6 @@ export function Oscilloscope() {
           }
         ];
         // Keep enough data for the current timebase plus some buffer
-        // If timebase is 5s, and we sample at 60fps, that's 300 points. 
-        // Let's keep a fixed buffer for simplicity but ensure it covers the window.
         if (newData.length > maxPoints) {
             return newData.slice(newData.length - maxPoints);
         }
@@ -118,10 +119,61 @@ export function Oscilloscope() {
     ctx.lineTo(width, height / 2);
     ctx.stroke();
 
+    // Trigger Level Line
+    if (triggerMode !== 'none') {
+        const trigY = (height / 2) - (triggerLevel / (vScale / 2)) * (height / 2);
+        ctx.strokeStyle = '#d97706'; // Amber
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(0, trigY);
+        ctx.lineTo(width, trigY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#d97706';
+        ctx.font = '10px monospace';
+        ctx.fillText(`T: ${triggerLevel}V`, 5, trigY - 2);
+    }
+
     if (data.length < 2) return;
 
-    const endTime = data[data.length - 1].time;
-    const startTime = endTime - timeBase;
+    let endTime = data[data.length - 1].time;
+    let startTime = endTime - timeBase;
+
+    // Trigger Logic
+    if (triggerMode !== 'none') {
+        // Find trigger point in the visible window (or slightly before)
+        // We look backwards from the end
+        let foundTrig = false;
+        for (let i = data.length - 2; i >= 0; i--) {
+            const p1 = data[i];
+            const p2 = data[i+1];
+            
+            // Check if we are within a reasonable search window (e.g. last 2 screens)
+            if (endTime - p1.time > timeBase * 2) break;
+
+            const v1 = p1.voltage;
+            const v2 = p2.voltage;
+            
+            let crossed = false;
+            if (triggerMode === 'rising') {
+                crossed = v1 <= triggerLevel && v2 >= triggerLevel;
+            } else {
+                crossed = v1 >= triggerLevel && v2 <= triggerLevel;
+            }
+
+            if (crossed) {
+                // Found trigger point!
+                // Align this point to the left (or specific offset)
+                // Let's align to 10% from left
+                const trigTime = p1.time + (triggerLevel - v1) / (v2 - v1) * (p2.time - p1.time);
+                startTime = trigTime - (timeBase * 0.1);
+                endTime = startTime + timeBase;
+                foundTrig = true;
+                break;
+            }
+        }
+    }
 
     // Helper to map time to x
     const mapX = (t: number) => {
@@ -129,8 +181,6 @@ export function Oscilloscope() {
     };
 
     // Helper to map value to y (0 is center)
-    // scale is total range (e.g. 10V means +/- 5V from center? Or 0 to 10V?)
-    // Let's assume scale is the full height range. Center is 0.
     const mapY = (val: number, scale: number) => {
         const range = scale; // Total range displayed
         const normalized = val / (range / 2); // -1 to 1
@@ -144,6 +194,7 @@ export function Oscilloscope() {
     let started = false;
     for (const p of data) {
         if (p.time < startTime) continue;
+        if (p.time > endTime) break;
         const x = mapX(p.time);
         const y = mapY(p.voltage, vScale);
         if (!started) {
@@ -162,6 +213,7 @@ export function Oscilloscope() {
     started = false;
     for (const p of data) {
         if (p.time < startTime) continue;
+        if (p.time > endTime) break;
         const x = mapX(p.time);
         const y = mapY(p.current, iScale);
         if (!started) {
@@ -181,6 +233,7 @@ export function Oscilloscope() {
       started = false;
       for (const p of data) {
           if (p.time < startTime) continue;
+          if (p.time > endTime) break;
           const x = mapX(p.time);
           const y = mapY(p.power, pScale);
           if (!started) {
@@ -193,7 +246,74 @@ export function Oscilloscope() {
       ctx.stroke();
     }
 
-  }, [data, timeBase, vScale, iScale, pScale, showPower]);
+    // Cursor
+    if (cursorPos) {
+        const t = startTime + (cursorPos.x / width) * timeBase;
+        
+        // Find closest data point
+        let closest = data[0];
+        let minDiff = Math.abs(data[0].time - t);
+        for (let i = 1; i < data.length; i++) {
+            const diff = Math.abs(data[i].time - t);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = data[i];
+            }
+        }
+
+        if (closest && minDiff < timeBase * 0.05) { // Only show if close enough
+            const x = mapX(closest.time);
+            
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw values near cursor
+            const boxX = x > width / 2 ? x - 130 : x + 10;
+            const boxY = cursorPos.y;
+            
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+            ctx.fillRect(boxX, boxY, 120, 80);
+            ctx.strokeStyle = '#475569';
+            ctx.strokeRect(boxX, boxY, 120, 80);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '10px monospace';
+            ctx.fillText(`T: ${closest.time.toFixed(3)}s`, boxX + 5, boxY + 15);
+            
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText(`V: ${closest.voltage.toFixed(3)}V`, boxX + 5, boxY + 30);
+            
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillText(`I: ${closest.current.toFixed(3)}A`, boxX + 5, boxY + 45);
+            
+            if (showPower) {
+                ctx.fillStyle = '#eab308';
+                ctx.fillText(`P: ${closest.power.toFixed(3)}W`, boxX + 5, boxY + 60);
+            }
+        }
+    }
+
+  }, [data, timeBase, vScale, iScale, pScale, showPower, triggerMode, triggerLevel, cursorPos]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+          setCursorPos({
+              x: e.clientX - rect.left,
+              y: e.clientY - rect.top
+          });
+      }
+  };
+
+  const handleMouseLeave = () => {
+      setCursorPos(null);
+  };
 
   if (!showOscilloscope) return null;
 
@@ -283,6 +403,30 @@ export function Oscilloscope() {
                     <div className="text-right text-xs text-yellow-400 font-mono">±{(pScale/2).toFixed(0)}W</div>
                 </div>
               )}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-700">
+                  <label className="text-[10px] text-slate-400 uppercase font-bold">Trigger</label>
+                  <select 
+                    value={triggerMode} 
+                    onChange={(e) => setTriggerMode(e.target.value as any)}
+                    className="bg-slate-900 text-xs text-slate-300 border border-slate-600 rounded px-1 py-0.5"
+                  >
+                      <option value="none">None</option>
+                      <option value="rising">Rising</option>
+                      <option value="falling">Falling</option>
+                  </select>
+              </div>
+              {triggerMode !== 'none' && (
+                <div>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Mức Trigger (V)</label>
+                    <input 
+                      type="range" min={-vScale/2} max={vScale/2} step="0.1" 
+                      value={triggerLevel} 
+                      onChange={(e) => setTriggerLevel(parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                    />
+                    <div className="text-right text-xs text-amber-500 font-mono">{triggerLevel.toFixed(1)}V</div>
+                </div>
+              )}
           </div>
       )}
 
@@ -299,7 +443,9 @@ export function Oscilloscope() {
                 ref={canvasRef} 
                 width={480} 
                 height={280} 
-                className="w-full h-full block"
+                className="w-full h-full block cursor-crosshair"
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
              />
              {/* Legend / Values */}
              <div className="absolute top-2 left-2 flex flex-col gap-1 pointer-events-none">

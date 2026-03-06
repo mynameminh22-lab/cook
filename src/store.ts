@@ -1,9 +1,18 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
-import { CircuitState, Component, ComponentType, Node, Point, EvaluationResult, LevelProgress } from './types';
+import { CircuitState, Component, ComponentType, Node, Point, EvaluationResult, LevelProgress, EnvironmentState } from './types';
 import { solveCircuit } from './engine/solver'; // Import the solver
 import { distToSegment } from './lib/utils';
 import { analyzeCircuit } from './utils/circuitAnalyzer';
+
+const INITIAL_ENVIRONMENT: EnvironmentState = {
+  timeOfDay: 12, // Noon
+  weather: 'sunny',
+  temperature: 25,
+  windSpeed: 5,
+  isSimulationEnabled: false,
+  timeSpeed: 1,
+};
 
 // ... (Interface remains same)
 
@@ -54,10 +63,13 @@ interface CircuitStore extends CircuitState {
   levelProgress: Record<number, LevelProgress>;
   showUI: boolean;
   setShowUI: (show: boolean) => void;
+  showEnvironment: boolean;
+  setShowEnvironment: (show: boolean) => void;
   controlMode: 'mouse' | 'touch';
   setControlMode: (mode: 'mouse' | 'touch') => void;
   laserMode: boolean;
   setLaserMode: (active: boolean) => void;
+  setEnvironment: (env: Partial<EnvironmentState>) => void;
 }
 
 const INITIAL_STATE: CircuitState = {
@@ -71,6 +83,8 @@ const INITIAL_STATE: CircuitState = {
   shortCircuitWarning: false,
   evaluationResult: null,
   levelProgress: {},
+  currentExample: null,
+  environment: INITIAL_ENVIRONMENT,
 };
 
 // Helper to create initial circuit
@@ -109,7 +123,7 @@ const createInitialCircuit = (): CircuitState => {
     { from: n6, to: n2, current: 0 },
   ];
 
-  const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+  const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, currentExample: null, environment: INITIAL_ENVIRONMENT };
   const solved = solveCircuit(state);
   return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
 };
@@ -127,10 +141,13 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
   evaluationResult: null,
   showUI: true,
   setShowUI: (show) => set({ showUI: show }),
+  showEnvironment: false,
+  setShowEnvironment: (show) => set({ showEnvironment: show }),
   controlMode: 'mouse', // Default to mouse, can detect later
   setControlMode: (mode) => set({ controlMode: mode }),
   laserMode: false,
   setLaserMode: (mode) => set({ laserMode: mode }),
+  setEnvironment: (env) => set((state) => ({ environment: { ...state.environment, ...env } })),
   evaluateCircuit: () => {
     const state = get();
     const result = analyzeCircuit(state);
@@ -299,6 +316,10 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
              type === 'inductor' ? 0.01 : // 10mH
              type === 'diode' ? 0.7 : // 0.7V drop
              type === 'ac_source' ? 220 : // 220V AC
+             type === 'clock' ? 1 : // 1Hz Clock
+             type === 'solar_panel' ? 12 : // 12V max
+             type === 'wind_turbine' ? 24 : // 24V max
+             type === 'thermoelectric_generator' ? 5 : // 5V max
              0, 
       nodes: [],
       current: 0,
@@ -405,6 +426,38 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
       };
       newNodes.push(node3);
       newComponent.nodes.push(node3Id);
+    }
+
+    if (type === 'seven_segment') {
+        // 5 Nodes: A, B, C, D, Common
+        // We already added node1 and node2 (A, B)
+        // We need to add C, D, Common
+        const node3Id = uuidv4();
+        const node4Id = uuidv4();
+        const node5Id = uuidv4();
+
+        // Recalculate positions for 5 nodes
+        // Default (Rotation 0)
+        // A: -30, -15
+        // B: -30, -5
+        // C: -30, 5
+        // D: -30, 15
+        // Com: 0, 30
+        
+        // Update node1 (A) and node2 (B) positions first
+        newNodes[0].position = { x: finalPosition.x - 30, y: finalPosition.y - 15 };
+        newNodes[1].position = { x: finalPosition.x - 30, y: finalPosition.y - 5 };
+
+        const n3Pos = { x: finalPosition.x - 30, y: finalPosition.y + 5 };
+        const n4Pos = { x: finalPosition.x - 30, y: finalPosition.y + 15 };
+        const n5Pos = { x: finalPosition.x, y: finalPosition.y + 30 };
+
+        const node3: Node = { id: node3Id, position: n3Pos, connections: [id], voltage: 0 };
+        const node4: Node = { id: node4Id, position: n4Pos, connections: [id], voltage: 0 };
+        const node5: Node = { id: node5Id, position: n5Pos, connections: [id], voltage: 0 };
+
+        newNodes.push(node3, node4, node5);
+        newComponent.nodes.push(node3Id, node4Id, node5Id);
     }
 
     set((state) => {
@@ -607,11 +660,29 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
   stepSimulation: (dt) => {
     set((state) => {
       if (!state.simulationRunning) return state;
+      
+      let newEnv = { ...state.environment };
+      if (state.environment.isSimulationEnabled) {
+        // timeSpeed is multiplier. Let's say 1 unit = 1 hour per 10 real seconds.
+        // dt is usually ~0.016s.
+        // timeIncrement = dt * timeSpeed * (1 hour / 10s) = dt * timeSpeed * 0.1
+        const timeIncrement = dt * state.environment.timeSpeed * 0.1;
+        let newTime = state.environment.timeOfDay + timeIncrement;
+        if (newTime >= 24) newTime -= 24;
+        
+        // Randomly fluctuate wind speed slightly
+        let newWind = state.environment.windSpeed + (Math.random() - 0.5) * 0.1;
+        newWind = Math.max(0, Math.min(30, newWind)); // clamp 0-30 m/s
+        
+        newEnv = { ...newEnv, timeOfDay: newTime, windSpeed: newWind };
+      }
+
       const newTime = state.time + dt;
-      const solved = solveCircuit(state, dt, newTime);
+      const solved = solveCircuit({ ...state, environment: newEnv }, dt, newTime);
       return {
         ...state,
         time: newTime,
+        environment: newEnv,
         nodes: solved.nodes,
         components: solved.components,
         wires: solved.wires,
@@ -633,6 +704,7 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
       // Ensure simulation keeps running or stops based on preference, 
       // but usually we want to keep the loaded state's simulation setting or default to true
       simulationRunning: true, 
+      currentExample: circuitState.currentExample || null,
     }));
   },
 

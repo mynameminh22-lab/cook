@@ -50,7 +50,7 @@ export const BASIC_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch nối tiếp cơ bản","description":"Mạch điện đơn giản nhất gồm nguồn điện, điện trở và bóng đèn mắc nối tiếp.","principle":"Trong mạch nối tiếp, dòng điện chạy qua các linh kiện là như nhau. Tổng điện áp trên các linh kiện bằng điện áp nguồn.","application":"Đèn trang trí, đèn pin cũ, các mạch cầu chì bảo vệ."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -97,7 +97,7 @@ export const BASIC_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch song song (2 Đèn)","description":"Hai bóng đèn được mắc song song với nguồn điện.","principle":"Trong mạch song song, điện áp trên các nhánh là như nhau. Dòng điện tổng bằng tổng dòng điện các nhánh.","application":"Hệ thống điện trong nhà, đèn pha xe hơi."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -141,7 +141,7 @@ export const BASIC_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch đèn LED","description":"Mạch điều khiển đèn LED với điện trở hạn dòng.","principle":"LED cần điện trở hạn dòng để tránh bị cháy do dòng điện quá lớn. Điện trở giúp giảm áp và giới hạn dòng điện.","application":"Đèn báo hiệu, màn hình LED, đèn chiếu sáng."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -196,7 +196,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n8, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cổng Logic OR (Dùng công tắc)","description":"Mạch thực hiện chức năng logic OR: Đèn sáng khi ít nhất một công tắc đóng.","principle":"Hai công tắc mắc song song. Dòng điện có thể đi qua nhánh này hoặc nhánh kia để đến đèn.","application":"Hệ thống báo động, đèn cầu thang đơn giản."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -247,7 +247,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n8, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cổng Logic AND (Dùng công tắc)","description":"Mạch thực hiện chức năng logic AND: Đèn chỉ sáng khi cả hai công tắc đều đóng.","principle":"Hai công tắc mắc nối tiếp. Dòng điện chỉ chạy qua khi cả hai cầu nối đều liền mạch.","application":"Hệ thống an toàn (cần nhấn 2 nút để kích hoạt), máy cắt công nghiệp."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -291,7 +291,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Chuông cửa (Nút nhấn)","description":"Mạch chuông cửa đơn giản sử dụng nút nhấn nhả.","principle":"Nút nhấn (Push Button) chỉ đóng mạch khi được giữ. Khi thả ra, mạch ngắt, chuông ngừng kêu.","application":"Chuông cửa, còi xe, bàn phím."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -343,7 +343,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cầu chì bảo vệ","description":"Mạch minh họa chức năng bảo vệ của cầu chì khi dòng điện quá tải.","principle":"Khi dòng điện vượt quá định mức của cầu chì, dây chì sẽ nóng chảy và ngắt mạch, bảo vệ các thiết bị khác.","application":"Bảo vệ mạch điện gia đình, thiết bị điện tử."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -395,7 +395,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Đo dòng điện và điện áp","description":"Cách mắc Ampe kế (nối tiếp) và Vôn kế (song song) để đo thông số mạch.","principle":"Ampe kế có điện trở rất nhỏ, mắc nối tiếp để đo dòng. Vôn kế có điện trở rất lớn, mắc song song để đo áp.","application":"Đồng hồ vạn năng (VOM), giám sát hệ thống điện."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -447,7 +447,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch phân áp (Voltage Divider)","description":"Mạch chia điện áp nguồn thành điện áp nhỏ hơn bằng hai điện trở nối tiếp.","principle":"Điện áp đầu ra Vout = Vin * (R2 / (R1 + R2)).","application":"Cảm biến (quang trở, nhiệt điện trở), điều chỉnh bias cho transistor."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -491,7 +491,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n6, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Điều chỉnh độ sáng (Dimmer)","description":"Mạch sử dụng biến trở để điều chỉnh độ sáng bóng đèn.","principle":"Biến trở thay đổi điện trở của mạch, từ đó thay đổi dòng điện chạy qua đèn, làm thay đổi độ sáng.","application":"Đèn ngủ, điều chỉnh tốc độ quạt, volume âm thanh."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -570,7 +570,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n10, to: n2, current: 0 },
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cầu Wheatstone","description":"Mạch cầu dùng để đo chính xác giá trị điện trở chưa biết.","principle":"Khi cầu cân bằng (dòng qua Ampe kế = 0), tỉ số các điện trở đối diện bằng nhau: R1/R3 = R2/Rx.","application":"Cân điện tử, cảm biến áp suất (load cell), đo nhiệt độ chính xác."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -632,7 +632,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: n10, to: n2, current: 0 }, // Lamp to Bat-
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cầu thang (2 công tắc 3 cực)","description":"Mạch điều khiển một đèn từ hai vị trí khác nhau.","principle":"Sử dụng hai công tắc 3 cực (SPDT) nối với nhau. Thay đổi trạng thái bất kỳ công tắc nào cũng sẽ đảo trạng thái đèn.","application":"Đèn cầu thang, đèn hành lang dài."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -706,7 +706,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: nBatN, to: nGnd, current: 0 }, // Battery Neg to GND
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Transistor làm công tắc","description":"Sử dụng Transistor NPN như một công tắc điện tử để điều khiển đèn LED.","principle":"Dòng điện nhỏ vào cực B (Base) điều khiển dòng điện lớn đi qua cực C (Collector) và E (Emitter).","application":"Mạch khuếch đại, mạch logic số, điều khiển động cơ."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -759,7 +759,7 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: nAc2, to: nGnd, current: 0 }, // AC Return to GND
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Op-Amp Buffer (Voltage Follower)","description":"Mạch khuếch đại thuật toán mắc theo kiểu lặp lại điện áp (Buffer).","principle":"Điện áp đầu ra bằng điện áp đầu vào (Vout = Vin). Trở kháng đầu vào rất lớn, trở kháng đầu ra rất nhỏ.","application":"Cách ly trở kháng giữa các tầng mạch, tránh sụt áp khi tải thay đổi."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -832,7 +832,148 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
         { from: nSwNC, to: nGnd, current: 0 }, // Switch NC to GND (Discharge path)
       ];
 
-      const state = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch nạp xả tụ điện (RC Circuit)","description":"Mạch minh họa quá trình nạp và xả điện của tụ điện qua điện trở.","principle":"Tụ điện tích trữ năng lượng dưới dạng điện trường. Thời gian nạp/xả phụ thuộc vào hằng số thời gian τ = R*C.","application":"Mạch định thời, mạch lọc nhiễu, đèn nháy."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  },
+  {
+    name: 'Giải mã BCD sang LED 7 đoạn',
+    description: 'Sử dụng 4 công tắc để tạo mã BCD (Binary Coded Decimal) và hiển thị số tương ứng trên LED 7 đoạn.',
+    principle: 'LED 7 đoạn nhận tín hiệu 4 bit (A, B, C, D) và giải mã để hiển thị các số từ 0 đến F (Hex).',
+    application: 'Đồng hồ số, bảng hiển thị, máy tính bỏ túi.',
+    create: () => {
+      const batId = uuidv4();
+      const swAId = uuidv4();
+      const swBId = uuidv4();
+      const swCId = uuidv4();
+      const swDId = uuidv4();
+      const dispId = uuidv4();
+      const gndId = uuidv4();
+
+      const batPos = { x: 100, y: 300 };
+      const swAPos = { x: 300, y: 150 };
+      const swBPos = { x: 300, y: 250 };
+      const swCPos = { x: 300, y: 350 };
+      const swDPos = { x: 300, y: 450 };
+      const dispPos = { x: 600, y: 300 };
+      const gndPos = { x: 600, y: 450 };
+
+      const nBatP = uuidv4(); const nBatN = uuidv4();
+      const nSwA1 = uuidv4(); const nSwA2 = uuidv4();
+      const nSwB1 = uuidv4(); const nSwB2 = uuidv4();
+      const nSwC1 = uuidv4(); const nSwC2 = uuidv4();
+      const nSwD1 = uuidv4(); const nSwD2 = uuidv4();
+      const nDispA = uuidv4(); const nDispB = uuidv4(); const nDispC = uuidv4(); const nDispD = uuidv4(); const nDispCom = uuidv4();
+      const nGnd = uuidv4();
+
+      const components: Component[] = [
+        { id: batId, type: 'battery', position: batPos, rotation: 0, value: 5, nodes: [nBatP, nBatN], current: 0, voltageDrop: 0 },
+        { id: swAId, type: 'switch', position: swAPos, rotation: 0, value: 0, nodes: [nSwA1, nSwA2], current: 0, voltageDrop: 0, isOpen: true, text: 'Bit A (1)' },
+        { id: swBId, type: 'switch', position: swBPos, rotation: 0, value: 0, nodes: [nSwB1, nSwB2], current: 0, voltageDrop: 0, isOpen: true, text: 'Bit B (2)' },
+        { id: swCId, type: 'switch', position: swCPos, rotation: 0, value: 0, nodes: [nSwC1, nSwC2], current: 0, voltageDrop: 0, isOpen: true, text: 'Bit C (4)' },
+        { id: swDId, type: 'switch', position: swDPos, rotation: 0, value: 0, nodes: [nSwD1, nSwD2], current: 0, voltageDrop: 0, isOpen: true, text: 'Bit D (8)' },
+        { id: dispId, type: 'seven_segment', position: dispPos, rotation: 0, value: 0, nodes: [nDispA, nDispB, nDispC, nDispD, nDispCom], current: 0, voltageDrop: 0 },
+        { id: gndId, type: 'ground', position: gndPos, rotation: 0, value: 0, nodes: [nGnd], current: 0, voltageDrop: 0 },
+      ];
+
+      const nodes: Node[] = [
+        { id: nBatP, position: { x: batPos.x - 30, y: batPos.y }, connections: [batId], voltage: 0 },
+        { id: nBatN, position: { x: batPos.x + 30, y: batPos.y }, connections: [batId], voltage: 0 },
+        
+        { id: nSwA1, position: { x: swAPos.x - 30, y: swAPos.y }, connections: [swAId], voltage: 0 },
+        { id: nSwA2, position: { x: swAPos.x + 30, y: swAPos.y }, connections: [swAId], voltage: 0 },
+        
+        { id: nSwB1, position: { x: swBPos.x - 30, y: swBPos.y }, connections: [swBId], voltage: 0 },
+        { id: nSwB2, position: { x: swBPos.x + 30, y: swBPos.y }, connections: [swBId], voltage: 0 },
+        
+        { id: nSwC1, position: { x: swCPos.x - 30, y: swCPos.y }, connections: [swCId], voltage: 0 },
+        { id: nSwC2, position: { x: swCPos.x + 30, y: swCPos.y }, connections: [swCId], voltage: 0 },
+        
+        { id: nSwD1, position: { x: swDPos.x - 30, y: swDPos.y }, connections: [swDId], voltage: 0 },
+        { id: nSwD2, position: { x: swDPos.x + 30, y: swDPos.y }, connections: [swDId], voltage: 0 },
+        
+        // Display Nodes (manually positioned based on addComponent logic)
+        { id: nDispA, position: { x: dispPos.x - 30, y: dispPos.y - 15 }, connections: [dispId], voltage: 0 },
+        { id: nDispB, position: { x: dispPos.x - 30, y: dispPos.y - 5 }, connections: [dispId], voltage: 0 },
+        { id: nDispC, position: { x: dispPos.x - 30, y: dispPos.y + 5 }, connections: [dispId], voltage: 0 },
+        { id: nDispD, position: { x: dispPos.x - 30, y: dispPos.y + 15 }, connections: [dispId], voltage: 0 },
+        { id: nDispCom, position: { x: dispPos.x, y: dispPos.y + 30 }, connections: [dispId], voltage: 0 },
+        
+        { id: nGnd, position: { x: gndPos.x - 20, y: gndPos.y }, connections: [gndId], voltage: 0 },
+      ];
+
+      const wires = [
+        // Power to Switches
+        { from: nBatP, to: nSwA1, current: 0 },
+        { from: nSwA1, to: nSwB1, current: 0 },
+        { from: nSwB1, to: nSwC1, current: 0 },
+        { from: nSwC1, to: nSwD1, current: 0 },
+        
+        // Switches to Display Inputs
+        { from: nSwA2, to: nDispA, current: 0 },
+        { from: nSwB2, to: nDispB, current: 0 },
+        { from: nSwC2, to: nDispC, current: 0 },
+        { from: nSwD2, to: nDispD, current: 0 },
+        
+        // Display Common to GND
+        { from: nDispCom, to: nGnd, current: 0 },
+        
+        // Battery Return to GND
+        { from: nBatN, to: nGnd, current: 0 },
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Giải mã BCD sang LED 7 đoạn","description":"Sử dụng 4 công tắc để tạo mã BCD (Binary Coded Decimal) và hiển thị số tương ứng trên LED 7 đoạn.","principle":"LED 7 đoạn nhận tín hiệu 4 bit (A, B, C, D) và giải mã để hiển thị các số từ 0 đến F (Hex).","application":"Đồng hồ số, bảng hiển thị, máy tính bỏ túi."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  },
+  {
+    name: 'Mạch tạo xung (Clock Blinky)',
+    description: 'Sử dụng nguồn xung (Clock) để làm đèn LED nhấp nháy theo tần số.',
+    principle: 'Nguồn xung tạo ra tín hiệu vuông (0V - 5V) thay đổi liên tục theo thời gian, làm LED bật tắt.',
+    application: 'Đèn báo trạng thái, mạch đếm thời gian.',
+    create: () => {
+      const clkId = uuidv4();
+      const resId = uuidv4();
+      const ledId = uuidv4();
+      const gndId = uuidv4();
+
+      const clkPos = { x: 200, y: 300 };
+      const resPos = { x: 400, y: 300 };
+      const ledPos = { x: 600, y: 300 };
+      const gndPos = { x: 400, y: 450 };
+
+      const nClk1 = uuidv4(); const nClk2 = uuidv4();
+      const nR1 = uuidv4(); const nR2 = uuidv4();
+      const nLedA = uuidv4(); const nLedK = uuidv4();
+      const nGnd = uuidv4();
+
+      const components: Component[] = [
+        { id: clkId, type: 'clock', position: clkPos, rotation: 0, value: 2, nodes: [nClk1, nClk2], current: 0, voltageDrop: 0 }, // 2Hz
+        { id: resId, type: 'resistor', position: resPos, rotation: 0, value: 220, nodes: [nR1, nR2], current: 0, voltageDrop: 0 },
+        { id: ledId, type: 'led', position: ledPos, rotation: 0, value: 10, nodes: [nLedA, nLedK], current: 0, voltageDrop: 0, color: '#00ff00' },
+        { id: gndId, type: 'ground', position: gndPos, rotation: 0, value: 0, nodes: [nGnd], current: 0, voltageDrop: 0 },
+      ];
+
+      const nodes: Node[] = [
+        { id: nClk1, position: { x: clkPos.x - 30, y: clkPos.y }, connections: [clkId], voltage: 0 },
+        { id: nClk2, position: { x: clkPos.x + 30, y: clkPos.y }, connections: [clkId], voltage: 0 },
+        { id: nR1, position: { x: resPos.x - 30, y: resPos.y }, connections: [resId], voltage: 0 },
+        { id: nR2, position: { x: resPos.x + 30, y: resPos.y }, connections: [resId], voltage: 0 },
+        { id: nLedA, position: { x: ledPos.x - 30, y: ledPos.y }, connections: [ledId], voltage: 0 },
+        { id: nLedK, position: { x: ledPos.x + 30, y: ledPos.y }, connections: [ledId], voltage: 0 },
+        { id: nGnd, position: { x: gndPos.x - 20, y: gndPos.y }, connections: [gndId], voltage: 0 },
+      ];
+
+      const wires = [
+        { from: nClk1, to: nR1, current: 0 },
+        { from: nR2, to: nLedA, current: 0 },
+        { from: nLedK, to: nGnd, current: 0 },
+        { from: nClk2, to: nGnd, current: 0 },
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch tạo xung (Clock Blinky)","description":"Sử dụng nguồn xung (Clock) để làm đèn LED nhấp nháy theo tần số.","principle":"Nguồn xung tạo ra tín hiệu vuông (0V - 5V) thay đổi liên tục theo thời gian, làm LED bật tắt.","application":"Đèn báo trạng thái, mạch đếm thời gian."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }

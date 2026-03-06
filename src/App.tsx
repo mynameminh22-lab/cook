@@ -13,6 +13,9 @@ import { MinigameModal } from './components/MinigameModal';
 import { LevelPanel } from './components/LevelPanel';
 import { Oscilloscope } from './components/Oscilloscope';
 import { EvaluationPanel } from './components/EvaluationPanel';
+import { ExampleInfoPanel } from './components/ExampleInfoPanel';
+import { CircuitExamplesModal } from './components/CircuitExamplesModal';
+import { EnvironmentPanel } from './components/EnvironmentPanel';
 import { useCircuitStore } from './store';
 import { AlertTriangle, Menu, X, Eye, EyeOff } from 'lucide-react';
 import { cn } from './lib/utils';
@@ -21,6 +24,7 @@ import { useShallow } from 'zustand/react/shallow';
 export default function App() {
   const [showWiki, setShowWiki] = useState(false);
   const [showMinigame, setShowMinigame] = useState(false);
+  const [showExamples, setShowExamples] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   
@@ -55,6 +59,7 @@ export default function App() {
         <Toolbar 
           onToggleWiki={() => setShowWiki(true)}
           onToggleMinigame={() => setShowMinigame(true)}
+          onToggleExamplesModal={() => setShowExamples(true)}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           onToggleInspector={() => setIsInspectorOpen(!isInspectorOpen)}
         />
@@ -82,7 +87,13 @@ export default function App() {
         {/* Main Canvas Area */}
         <div className="flex-1 relative overflow-hidden flex flex-col">
             <Canvas />
-            {showUI && <Oscilloscope />}
+            {showUI && (
+              <>
+                <Oscilloscope />
+                <ExampleInfoPanel />
+                <EnvironmentPanel />
+              </>
+            )}
         </div>
 
         {/* Inspector - Responsive */}
@@ -107,6 +118,7 @@ export default function App() {
           <>
             <Wiki isOpen={showWiki} onClose={() => setShowWiki(false)} />
             <MinigameModal isOpen={showMinigame} onClose={() => setShowMinigame(false)} />
+            <CircuitExamplesModal isOpen={showExamples} onClose={() => setShowExamples(false)} />
             <LevelPanel />
             <EvaluationPanel />
           </>

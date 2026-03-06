@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { LEVELS, Level } from '../data/levels';
 import { useCircuitStore } from '../store';
-import { X, PlayCircle, Trophy, Star, Zap, Wrench, PlusCircle, BookOpen } from 'lucide-react';
+import { X, PlayCircle, Trophy, Star, Zap, Wrench, PlusCircle, BookOpen, HelpCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface MinigameModalProps {
@@ -11,7 +11,7 @@ interface MinigameModalProps {
 }
 
 export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
-  const [activeTab, setActiveTab] = useState<'basic' | 'repair' | 'build'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'repair' | 'build' | 'quiz'>('basic');
 
   const { setCurrentLevelId, loadCircuit, levelProgress } = useCircuitStore(useShallow(state => ({
     setCurrentLevelId: state.setCurrentLevelId,
@@ -123,11 +123,11 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6">
+        <div className="flex border-b border-slate-200 bg-slate-50/50 px-2 sm:px-6 overflow-x-auto hide-scrollbar">
           <button
             onClick={() => setActiveTab('basic')}
             className={cn(
-              "flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2",
+              "flex items-center gap-2 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-2 whitespace-nowrap",
               activeTab === 'basic' 
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
@@ -139,7 +139,7 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
           <button
             onClick={() => setActiveTab('repair')}
             className={cn(
-              "flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2",
+              "flex items-center gap-2 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-2 whitespace-nowrap",
               activeTab === 'repair' 
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
@@ -151,7 +151,7 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
           <button
             onClick={() => setActiveTab('build')}
             className={cn(
-              "flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2",
+              "flex items-center gap-2 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-2 whitespace-nowrap",
               activeTab === 'build' 
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
@@ -159,6 +159,18 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
           >
             <PlusCircle size={18} />
             Thêm linh kiện
+          </button>
+          <button
+            onClick={() => setActiveTab('quiz')}
+            className={cn(
+              "flex items-center gap-2 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-2 whitespace-nowrap",
+              activeTab === 'quiz' 
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+            )}
+          >
+            <HelpCircle size={18} />
+            Vấn đáp
           </button>
         </div>
 
