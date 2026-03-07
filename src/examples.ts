@@ -145,112 +145,6 @@ export const BASIC_EXAMPLES: CircuitExample[] = [
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
-  }
-];
-
-export const COMPLEX_EXAMPLES: CircuitExample[] = [
-  {
-    name: 'Cổng Logic OR (Dùng công tắc)',
-    description: 'Mạch thực hiện chức năng logic OR: Đèn sáng khi ít nhất một công tắc đóng.',
-    principle: 'Hai công tắc mắc song song. Dòng điện có thể đi qua nhánh này hoặc nhánh kia để đến đèn.',
-    application: 'Hệ thống báo động, đèn cầu thang đơn giản.',
-    create: () => {
-      const batteryId = uuidv4();
-      const sw1Id = uuidv4();
-      const sw2Id = uuidv4();
-      const lampId = uuidv4();
-      
-      const batPos = { x: 100, y: 300 };
-      const sw1Pos = { x: 300, y: 200 };
-      const sw2Pos = { x: 300, y: 400 };
-      const lampPos = { x: 500, y: 300 };
-
-      const n1 = uuidv4(); const n2 = uuidv4();
-      const n3 = uuidv4(); const n4 = uuidv4();
-      const n5 = uuidv4(); const n6 = uuidv4();
-      const n7 = uuidv4(); const n8 = uuidv4();
-
-      const components: Component[] = [
-        { id: batteryId, type: 'battery', position: batPos, rotation: 0, value: 12, nodes: [n1, n2], current: 0, voltageDrop: 0 },
-        { id: sw1Id, type: 'switch', position: sw1Pos, rotation: 0, value: 0, nodes: [n3, n4], current: 0, voltageDrop: 0, isOpen: true },
-        { id: sw2Id, type: 'switch', position: sw2Pos, rotation: 0, value: 0, nodes: [n5, n6], current: 0, voltageDrop: 0, isOpen: true },
-        { id: lampId, type: 'lamp', position: lampPos, rotation: 0, value: 100, nodes: [n7, n8], current: 0, voltageDrop: 0 },
-      ];
-
-      const nodes: Node[] = [
-        { id: n1, position: { x: batPos.x - 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
-        { id: n2, position: { x: batPos.x + 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
-        { id: n3, position: { x: sw1Pos.x - 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
-        { id: n4, position: { x: sw1Pos.x + 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
-        { id: n5, position: { x: sw2Pos.x - 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
-        { id: n6, position: { x: sw2Pos.x + 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
-        { id: n7, position: { x: lampPos.x - 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
-        { id: n8, position: { x: lampPos.x + 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
-      ];
-
-      const wires = [
-        { from: n1, to: n3, current: 0 },
-        { from: n3, to: n5, current: 0 },
-        { from: n4, to: n7, current: 0 },
-        { from: n6, to: n7, current: 0 },
-        { from: n8, to: n2, current: 0 },
-      ];
-
-      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cổng Logic OR (Dùng công tắc)","description":"Mạch thực hiện chức năng logic OR: Đèn sáng khi ít nhất một công tắc đóng.","principle":"Hai công tắc mắc song song. Dòng điện có thể đi qua nhánh này hoặc nhánh kia để đến đèn.","application":"Hệ thống báo động, đèn cầu thang đơn giản."} };
-      const solved = solveCircuit(state);
-      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
-    }
-  },
-  {
-    name: 'Cổng Logic AND (Dùng công tắc)',
-    description: 'Mạch thực hiện chức năng logic AND: Đèn chỉ sáng khi cả hai công tắc đều đóng.',
-    principle: 'Hai công tắc mắc nối tiếp. Dòng điện chỉ chạy qua khi cả hai cầu nối đều liền mạch.',
-    application: 'Hệ thống an toàn (cần nhấn 2 nút để kích hoạt), máy cắt công nghiệp.',
-    create: () => {
-      const batteryId = uuidv4();
-      const sw1Id = uuidv4();
-      const sw2Id = uuidv4();
-      const lampId = uuidv4();
-      
-      const batPos = { x: 100, y: 300 };
-      const sw1Pos = { x: 300, y: 300 };
-      const sw2Pos = { x: 500, y: 300 };
-      const lampPos = { x: 700, y: 300 };
-
-      const n1 = uuidv4(); const n2 = uuidv4();
-      const n3 = uuidv4(); const n4 = uuidv4();
-      const n5 = uuidv4(); const n6 = uuidv4();
-      const n7 = uuidv4(); const n8 = uuidv4();
-
-      const components: Component[] = [
-        { id: batteryId, type: 'battery', position: batPos, rotation: 0, value: 12, nodes: [n1, n2], current: 0, voltageDrop: 0 },
-        { id: sw1Id, type: 'switch', position: sw1Pos, rotation: 0, value: 0, nodes: [n3, n4], current: 0, voltageDrop: 0, isOpen: true },
-        { id: sw2Id, type: 'switch', position: sw2Pos, rotation: 0, value: 0, nodes: [n5, n6], current: 0, voltageDrop: 0, isOpen: true },
-        { id: lampId, type: 'lamp', position: lampPos, rotation: 0, value: 100, nodes: [n7, n8], current: 0, voltageDrop: 0 },
-      ];
-
-      const nodes: Node[] = [
-        { id: n1, position: { x: batPos.x - 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
-        { id: n2, position: { x: batPos.x + 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
-        { id: n3, position: { x: sw1Pos.x - 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
-        { id: n4, position: { x: sw1Pos.x + 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
-        { id: n5, position: { x: sw2Pos.x - 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
-        { id: n6, position: { x: sw2Pos.x + 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
-        { id: n7, position: { x: lampPos.x - 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
-        { id: n8, position: { x: lampPos.x + 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
-      ];
-
-      const wires = [
-        { from: n1, to: n3, current: 0 },
-        { from: n4, to: n5, current: 0 },
-        { from: n6, to: n7, current: 0 },
-        { from: n8, to: n2, current: 0 },
-      ];
-
-      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cổng Logic AND (Dùng công tắc)","description":"Mạch thực hiện chức năng logic AND: Đèn chỉ sáng khi cả hai công tắc đều đóng.","principle":"Hai công tắc mắc nối tiếp. Dòng điện chỉ chạy qua khi cả hai cầu nối đều liền mạch.","application":"Hệ thống an toàn (cần nhấn 2 nút để kích hoạt), máy cắt công nghiệp."} };
-      const solved = solveCircuit(state);
-      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
-    }
   },
   {
     name: 'Chuông cửa (Nút nhấn)',
@@ -492,6 +386,112 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
       ];
 
       const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Điều chỉnh độ sáng (Dimmer)","description":"Mạch sử dụng biến trở để điều chỉnh độ sáng bóng đèn.","principle":"Biến trở thay đổi điện trở của mạch, từ đó thay đổi dòng điện chạy qua đèn, làm thay đổi độ sáng.","application":"Đèn ngủ, điều chỉnh tốc độ quạt, volume âm thanh."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  },
+];
+
+export const COMPLEX_EXAMPLES: CircuitExample[] = [
+  {
+    name: 'Cổng Logic OR (Dùng công tắc)',
+    description: 'Mạch thực hiện chức năng logic OR: Đèn sáng khi ít nhất một công tắc đóng.',
+    principle: 'Hai công tắc mắc song song. Dòng điện có thể đi qua nhánh này hoặc nhánh kia để đến đèn.',
+    application: 'Hệ thống báo động, đèn cầu thang đơn giản.',
+    create: () => {
+      const batteryId = uuidv4();
+      const sw1Id = uuidv4();
+      const sw2Id = uuidv4();
+      const lampId = uuidv4();
+      
+      const batPos = { x: 100, y: 300 };
+      const sw1Pos = { x: 300, y: 200 };
+      const sw2Pos = { x: 300, y: 400 };
+      const lampPos = { x: 500, y: 300 };
+
+      const n1 = uuidv4(); const n2 = uuidv4();
+      const n3 = uuidv4(); const n4 = uuidv4();
+      const n5 = uuidv4(); const n6 = uuidv4();
+      const n7 = uuidv4(); const n8 = uuidv4();
+
+      const components: Component[] = [
+        { id: batteryId, type: 'battery', position: batPos, rotation: 0, value: 12, nodes: [n1, n2], current: 0, voltageDrop: 0 },
+        { id: sw1Id, type: 'switch', position: sw1Pos, rotation: 0, value: 0, nodes: [n3, n4], current: 0, voltageDrop: 0, isOpen: true },
+        { id: sw2Id, type: 'switch', position: sw2Pos, rotation: 0, value: 0, nodes: [n5, n6], current: 0, voltageDrop: 0, isOpen: true },
+        { id: lampId, type: 'lamp', position: lampPos, rotation: 0, value: 100, nodes: [n7, n8], current: 0, voltageDrop: 0 },
+      ];
+
+      const nodes: Node[] = [
+        { id: n1, position: { x: batPos.x - 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
+        { id: n2, position: { x: batPos.x + 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
+        { id: n3, position: { x: sw1Pos.x - 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
+        { id: n4, position: { x: sw1Pos.x + 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
+        { id: n5, position: { x: sw2Pos.x - 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
+        { id: n6, position: { x: sw2Pos.x + 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
+        { id: n7, position: { x: lampPos.x - 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
+        { id: n8, position: { x: lampPos.x + 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
+      ];
+
+      const wires = [
+        { from: n1, to: n3, current: 0 },
+        { from: n3, to: n5, current: 0 },
+        { from: n4, to: n7, current: 0 },
+        { from: n6, to: n7, current: 0 },
+        { from: n8, to: n2, current: 0 },
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cổng Logic OR (Dùng công tắc)","description":"Mạch thực hiện chức năng logic OR: Đèn sáng khi ít nhất một công tắc đóng.","principle":"Hai công tắc mắc song song. Dòng điện có thể đi qua nhánh này hoặc nhánh kia để đến đèn.","application":"Hệ thống báo động, đèn cầu thang đơn giản."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  },
+  {
+    name: 'Cổng Logic AND (Dùng công tắc)',
+    description: 'Mạch thực hiện chức năng logic AND: Đèn chỉ sáng khi cả hai công tắc đều đóng.',
+    principle: 'Hai công tắc mắc nối tiếp. Dòng điện chỉ chạy qua khi cả hai cầu nối đều liền mạch.',
+    application: 'Hệ thống an toàn (cần nhấn 2 nút để kích hoạt), máy cắt công nghiệp.',
+    create: () => {
+      const batteryId = uuidv4();
+      const sw1Id = uuidv4();
+      const sw2Id = uuidv4();
+      const lampId = uuidv4();
+      
+      const batPos = { x: 100, y: 300 };
+      const sw1Pos = { x: 300, y: 300 };
+      const sw2Pos = { x: 500, y: 300 };
+      const lampPos = { x: 700, y: 300 };
+
+      const n1 = uuidv4(); const n2 = uuidv4();
+      const n3 = uuidv4(); const n4 = uuidv4();
+      const n5 = uuidv4(); const n6 = uuidv4();
+      const n7 = uuidv4(); const n8 = uuidv4();
+
+      const components: Component[] = [
+        { id: batteryId, type: 'battery', position: batPos, rotation: 0, value: 12, nodes: [n1, n2], current: 0, voltageDrop: 0 },
+        { id: sw1Id, type: 'switch', position: sw1Pos, rotation: 0, value: 0, nodes: [n3, n4], current: 0, voltageDrop: 0, isOpen: true },
+        { id: sw2Id, type: 'switch', position: sw2Pos, rotation: 0, value: 0, nodes: [n5, n6], current: 0, voltageDrop: 0, isOpen: true },
+        { id: lampId, type: 'lamp', position: lampPos, rotation: 0, value: 100, nodes: [n7, n8], current: 0, voltageDrop: 0 },
+      ];
+
+      const nodes: Node[] = [
+        { id: n1, position: { x: batPos.x - 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
+        { id: n2, position: { x: batPos.x + 30, y: batPos.y }, connections: [batteryId], voltage: 0 },
+        { id: n3, position: { x: sw1Pos.x - 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
+        { id: n4, position: { x: sw1Pos.x + 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
+        { id: n5, position: { x: sw2Pos.x - 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
+        { id: n6, position: { x: sw2Pos.x + 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
+        { id: n7, position: { x: lampPos.x - 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
+        { id: n8, position: { x: lampPos.x + 30, y: lampPos.y }, connections: [lampId], voltage: 0 },
+      ];
+
+      const wires = [
+        { from: n1, to: n3, current: 0 },
+        { from: n4, to: n5, current: 0 },
+        { from: n6, to: n7, current: 0 },
+        { from: n8, to: n2, current: 0 },
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Cổng Logic AND (Dùng công tắc)","description":"Mạch thực hiện chức năng logic AND: Đèn chỉ sáng khi cả hai công tắc đều đóng.","principle":"Hai công tắc mắc nối tiếp. Dòng điện chỉ chạy qua khi cả hai cầu nối đều liền mạch.","application":"Hệ thống an toàn (cần nhấn 2 nút để kích hoạt), máy cắt công nghiệp."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
@@ -838,6 +838,59 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
     }
   },
   {
+    name: 'Mạch tạo xung (Clock Blinky)',
+    description: 'Sử dụng nguồn xung (Clock) để làm đèn LED nhấp nháy theo tần số.',
+    principle: 'Nguồn xung tạo ra tín hiệu vuông (0V - 5V) thay đổi liên tục theo thời gian, làm LED bật tắt.',
+    application: 'Đèn báo trạng thái, mạch đếm thời gian.',
+    create: () => {
+      const clkId = uuidv4();
+      const resId = uuidv4();
+      const ledId = uuidv4();
+      const gndId = uuidv4();
+
+      const clkPos = { x: 200, y: 300 };
+      const resPos = { x: 400, y: 300 };
+      const ledPos = { x: 600, y: 300 };
+      const gndPos = { x: 400, y: 450 };
+
+      const nClk1 = uuidv4(); const nClk2 = uuidv4();
+      const nR1 = uuidv4(); const nR2 = uuidv4();
+      const nLedA = uuidv4(); const nLedK = uuidv4();
+      const nGnd = uuidv4();
+
+      const components: Component[] = [
+        { id: clkId, type: 'clock', position: clkPos, rotation: 0, value: 2, nodes: [nClk1, nClk2], current: 0, voltageDrop: 0 }, // 2Hz
+        { id: resId, type: 'resistor', position: resPos, rotation: 0, value: 220, nodes: [nR1, nR2], current: 0, voltageDrop: 0 },
+        { id: ledId, type: 'led', position: ledPos, rotation: 0, value: 10, nodes: [nLedA, nLedK], current: 0, voltageDrop: 0, color: '#00ff00' },
+        { id: gndId, type: 'ground', position: gndPos, rotation: 0, value: 0, nodes: [nGnd], current: 0, voltageDrop: 0 },
+      ];
+
+      const nodes: Node[] = [
+        { id: nClk1, position: { x: clkPos.x - 30, y: clkPos.y }, connections: [clkId], voltage: 0 },
+        { id: nClk2, position: { x: clkPos.x + 30, y: clkPos.y }, connections: [clkId], voltage: 0 },
+        { id: nR1, position: { x: resPos.x - 30, y: resPos.y }, connections: [resId], voltage: 0 },
+        { id: nR2, position: { x: resPos.x + 30, y: resPos.y }, connections: [resId], voltage: 0 },
+        { id: nLedA, position: { x: ledPos.x - 30, y: ledPos.y }, connections: [ledId], voltage: 0 },
+        { id: nLedK, position: { x: ledPos.x + 30, y: ledPos.y }, connections: [ledId], voltage: 0 },
+        { id: nGnd, position: { x: gndPos.x - 20, y: gndPos.y }, connections: [gndId], voltage: 0 },
+      ];
+
+      const wires = [
+        { from: nClk1, to: nR1, current: 0 },
+        { from: nR2, to: nLedA, current: 0 },
+        { from: nLedK, to: nGnd, current: 0 },
+        { from: nClk2, to: nGnd, current: 0 },
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch tạo xung (Clock Blinky)","description":"Sử dụng nguồn xung (Clock) để làm đèn LED nhấp nháy theo tần số.","principle":"Nguồn xung tạo ra tín hiệu vuông (0V - 5V) thay đổi liên tục theo thời gian, làm LED bật tắt.","application":"Đèn báo trạng thái, mạch đếm thời gian."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  }
+];
+
+export const EXTREMELY_COMPLEX_EXAMPLES: CircuitExample[] = [
+  {
     name: 'Giải mã BCD sang LED 7 đoạn',
     description: 'Sử dụng 4 công tắc để tạo mã BCD (Binary Coded Decimal) và hiển thị số tương ứng trên LED 7 đoạn.',
     principle: 'LED 7 đoạn nhận tín hiệu 4 bit (A, B, C, D) và giải mã để hiển thị các số từ 0 đến F (Hex).',
@@ -929,51 +982,81 @@ export const COMPLEX_EXAMPLES: CircuitExample[] = [
     }
   },
   {
-    name: 'Mạch tạo xung (Clock Blinky)',
-    description: 'Sử dụng nguồn xung (Clock) để làm đèn LED nhấp nháy theo tần số.',
-    principle: 'Nguồn xung tạo ra tín hiệu vuông (0V - 5V) thay đổi liên tục theo thời gian, làm LED bật tắt.',
-    application: 'Đèn báo trạng thái, mạch đếm thời gian.',
+    name: 'Hệ thống Năng lượng Xanh',
+    description: 'Mạch kết hợp Pin mặt trời và Tuabin gió để sạc pin và cấp điện cho tải.',
+    principle: 'Nhiều nguồn năng lượng tái tạo có thể mắc song song (qua diode bảo vệ) để cùng cung cấp điện cho hệ thống.',
+    application: 'Hệ thống điện độc lập (Off-grid), trạm sạc năng lượng mặt trời/gió.',
     create: () => {
-      const clkId = uuidv4();
-      const resId = uuidv4();
-      const ledId = uuidv4();
+      const solarId = uuidv4();
+      const windId = uuidv4();
+      const diode1Id = uuidv4();
+      const diode2Id = uuidv4();
+      const batId = uuidv4();
+      const swId = uuidv4();
+      const lampId = uuidv4();
       const gndId = uuidv4();
 
-      const clkPos = { x: 200, y: 300 };
-      const resPos = { x: 400, y: 300 };
-      const ledPos = { x: 600, y: 300 };
+      const solarPos = { x: 100, y: 150 };
+      const windPos = { x: 100, y: 350 };
+      const d1Pos = { x: 250, y: 150 };
+      const d2Pos = { x: 250, y: 350 };
+      const batPos = { x: 400, y: 250 };
+      const swPos = { x: 550, y: 150 };
+      const lampPos = { x: 700, y: 250 };
       const gndPos = { x: 400, y: 450 };
 
-      const nClk1 = uuidv4(); const nClk2 = uuidv4();
-      const nR1 = uuidv4(); const nR2 = uuidv4();
-      const nLedA = uuidv4(); const nLedK = uuidv4();
+      const nSolP = uuidv4(); const nSolN = uuidv4();
+      const nWinP = uuidv4(); const nWinN = uuidv4();
+      const nD1A = uuidv4(); const nD1K = uuidv4();
+      const nD2A = uuidv4(); const nD2K = uuidv4();
+      const nBatP = uuidv4(); const nBatN = uuidv4();
+      const nSw1 = uuidv4(); const nSw2 = uuidv4();
+      const nLamp1 = uuidv4(); const nLamp2 = uuidv4();
       const nGnd = uuidv4();
 
       const components: Component[] = [
-        { id: clkId, type: 'clock', position: clkPos, rotation: 0, value: 2, nodes: [nClk1, nClk2], current: 0, voltageDrop: 0 }, // 2Hz
-        { id: resId, type: 'resistor', position: resPos, rotation: 0, value: 220, nodes: [nR1, nR2], current: 0, voltageDrop: 0 },
-        { id: ledId, type: 'led', position: ledPos, rotation: 0, value: 10, nodes: [nLedA, nLedK], current: 0, voltageDrop: 0, color: '#00ff00' },
+        { id: solarId, type: 'solar_panel', position: solarPos, rotation: 0, value: 12, nodes: [nSolP, nSolN], current: 0, voltageDrop: 0 },
+        { id: windId, type: 'wind_turbine', position: windPos, rotation: 0, value: 12, nodes: [nWinP, nWinN], current: 0, voltageDrop: 0 },
+        { id: diode1Id, type: 'diode', position: d1Pos, rotation: 0, value: 0.7, nodes: [nD1A, nD1K], current: 0, voltageDrop: 0 },
+        { id: diode2Id, type: 'diode', position: d2Pos, rotation: 0, value: 0.7, nodes: [nD2A, nD2K], current: 0, voltageDrop: 0 },
+        { id: batId, type: 'battery', position: batPos, rotation: 90, value: 12, nodes: [nBatP, nBatN], current: 0, voltageDrop: 0 },
+        { id: swId, type: 'switch', position: swPos, rotation: 0, value: 0, nodes: [nSw1, nSw2], current: 0, voltageDrop: 0, isOpen: true },
+        { id: lampId, type: 'lamp', position: lampPos, rotation: 90, value: 100, nodes: [nLamp1, nLamp2], current: 0, voltageDrop: 0 },
         { id: gndId, type: 'ground', position: gndPos, rotation: 0, value: 0, nodes: [nGnd], current: 0, voltageDrop: 0 },
       ];
 
       const nodes: Node[] = [
-        { id: nClk1, position: { x: clkPos.x - 30, y: clkPos.y }, connections: [clkId], voltage: 0 },
-        { id: nClk2, position: { x: clkPos.x + 30, y: clkPos.y }, connections: [clkId], voltage: 0 },
-        { id: nR1, position: { x: resPos.x - 30, y: resPos.y }, connections: [resId], voltage: 0 },
-        { id: nR2, position: { x: resPos.x + 30, y: resPos.y }, connections: [resId], voltage: 0 },
-        { id: nLedA, position: { x: ledPos.x - 30, y: ledPos.y }, connections: [ledId], voltage: 0 },
-        { id: nLedK, position: { x: ledPos.x + 30, y: ledPos.y }, connections: [ledId], voltage: 0 },
+        { id: nSolP, position: { x: solarPos.x + 30, y: solarPos.y - 10 }, connections: [solarId], voltage: 0 },
+        { id: nSolN, position: { x: solarPos.x + 30, y: solarPos.y + 10 }, connections: [solarId], voltage: 0 },
+        { id: nWinP, position: { x: windPos.x + 30, y: windPos.y - 10 }, connections: [windId], voltage: 0 },
+        { id: nWinN, position: { x: windPos.x + 30, y: windPos.y + 10 }, connections: [windId], voltage: 0 },
+        { id: nD1A, position: { x: d1Pos.x - 30, y: d1Pos.y }, connections: [diode1Id], voltage: 0 },
+        { id: nD1K, position: { x: d1Pos.x + 30, y: d1Pos.y }, connections: [diode1Id], voltage: 0 },
+        { id: nD2A, position: { x: d2Pos.x - 30, y: d2Pos.y }, connections: [diode2Id], voltage: 0 },
+        { id: nD2K, position: { x: d2Pos.x + 30, y: d2Pos.y }, connections: [diode2Id], voltage: 0 },
+        { id: nBatP, position: { x: batPos.x, y: batPos.y - 30 }, connections: [batId], voltage: 0 },
+        { id: nBatN, position: { x: batPos.x, y: batPos.y + 30 }, connections: [batId], voltage: 0 },
+        { id: nSw1, position: { x: swPos.x - 30, y: swPos.y }, connections: [swId], voltage: 0 },
+        { id: nSw2, position: { x: swPos.x + 30, y: swPos.y }, connections: [swId], voltage: 0 },
+        { id: nLamp1, position: { x: lampPos.x, y: lampPos.y - 30 }, connections: [lampId], voltage: 0 },
+        { id: nLamp2, position: { x: lampPos.x, y: lampPos.y + 30 }, connections: [lampId], voltage: 0 },
         { id: nGnd, position: { x: gndPos.x - 20, y: gndPos.y }, connections: [gndId], voltage: 0 },
       ];
 
       const wires = [
-        { from: nClk1, to: nR1, current: 0 },
-        { from: nR2, to: nLedA, current: 0 },
-        { from: nLedK, to: nGnd, current: 0 },
-        { from: nClk2, to: nGnd, current: 0 },
+        { from: nSolP, to: nD1A, current: 0 },
+        { from: nWinP, to: nD2A, current: 0 },
+        { from: nD1K, to: nBatP, current: 0 },
+        { from: nD2K, to: nBatP, current: 0 },
+        { from: nBatP, to: nSw1, current: 0 },
+        { from: nSw2, to: nLamp1, current: 0 },
+        { from: nLamp2, to: nGnd, current: 0 },
+        { from: nBatN, to: nGnd, current: 0 },
+        { from: nSolN, to: nGnd, current: 0 },
+        { from: nWinN, to: nGnd, current: 0 },
       ];
 
-      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch tạo xung (Clock Blinky)","description":"Sử dụng nguồn xung (Clock) để làm đèn LED nhấp nháy theo tần số.","principle":"Nguồn xung tạo ra tín hiệu vuông (0V - 5V) thay đổi liên tục theo thời gian, làm LED bật tắt.","application":"Đèn báo trạng thái, mạch đếm thời gian."} };
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 1, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: true, timeSpeed: 1 }, currentExample: {"name":"Hệ thống Năng lượng Xanh","description":"Mạch kết hợp Pin mặt trời và Tuabin gió để sạc pin và cấp điện cho tải.","principle":"Nhiều nguồn năng lượng tái tạo có thể mắc song song (qua diode bảo vệ) để cùng cung cấp điện cho hệ thống.","application":"Hệ thống điện độc lập (Off-grid), trạm sạc năng lượng mặt trời/gió."} };
       const solved = solveCircuit(state);
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }

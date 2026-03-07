@@ -6,7 +6,7 @@ import { cn, getResistorColors, formatValue } from '../lib/utils';
 import { AlertTriangle, Flame } from 'lucide-react';
 
 // Simple visual representations for components
-const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { component: Component; isSelected: boolean; onToggle?: () => void }) => {
+export const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { component: Component; isSelected: boolean; onToggle?: () => void }) => {
   const { type, rotation, value, isBroken } = component;
   
   // Common styles
@@ -40,24 +40,44 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
 
       {/* Internal Symbol Drawing */}
       {type === 'push_button' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
           <line x1="0" y1="32" x2="20" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="44" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="20" cy="32" r="3" fill="#1e293b" />
-          <circle cx="44" cy="32" r="3" fill="#1e293b" />
-          <line x1="20" y1={component.isOpen ? 20 : 32} x2="44" y2={component.isOpen ? 20 : 32} stroke="#1e293b" strokeWidth="2" className="transition-all duration-100" />
-          <line x1="32" y1={component.isOpen ? 8 : 20} x2="32" y2={component.isOpen ? 20 : 32} stroke="#1e293b" strokeWidth="2" className="transition-all duration-100" />
+          
+          {/* Terminals */}
+          <circle cx="20" cy="32" r="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1" />
+          <circle cx="44" cy="32" r="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1" />
+          
+          {/* Button Mechanism */}
+          <g className="transition-all duration-100" style={{ transform: component.isOpen ? 'translateY(-8px)' : 'translateY(0px)' }}>
+            {/* Contact Bar */}
+            <line x1="20" y1="28" x2="44" y2="28" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
+            
+            {/* Plunger */}
+            <line x1="32" y1="28" x2="32" y2="14" stroke="#475569" strokeWidth="4" />
+            
+            {/* Button Cap */}
+            <rect x="24" y="8" width="16" height="6" rx="2" fill="#ef4444" stroke="#991b1b" strokeWidth="1" />
+            <rect x="25" y="9" width="14" height="2" fill="white" opacity="0.4" rx="1" />
+          </g>
         </svg>
       )}
       {type === 'spdt_switch' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
           <line x1="0" y1="32" x2="20" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="44" y1="16" x2="64" y2="16" stroke="#1e293b" strokeWidth="2" />
           <line x1="44" y1="48" x2="64" y2="48" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="20" cy="32" r="3" fill="#1e293b" />
-          <circle cx="44" cy="16" r="3" fill="#1e293b" />
-          <circle cx="44" cy="48" r="3" fill="#1e293b" />
-          <line x1="20" y1="32" x2="42" y2={component.isOpen ? 46 : 18} stroke="#1e293b" strokeWidth="2" className="transition-all duration-200" />
+          
+          {/* Terminals */}
+          <circle cx="20" cy="32" r="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1" />
+          <circle cx="44" cy="16" r="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1" />
+          <circle cx="44" cy="48" r="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1" />
+          
+          {/* Switch Blade */}
+          <g className="transition-all duration-200 origin-[20px_32px]" style={{ transform: component.isOpen ? 'rotate(35deg)' : 'rotate(-35deg)' }}>
+            <rect x="20" y="30" width="26" height="4" rx="2" fill="#ef4444" stroke="#991b1b" strokeWidth="1" />
+            <rect x="22" y="30.5" width="22" height="1.5" fill="white" opacity="0.4" />
+          </g>
         </svg>
       )}
       {type === 'ground' && (
@@ -69,167 +89,363 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
         </svg>
       )}
       {type === 'capacitor' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <line x1="0" y1="32" x2="28" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="36" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="28" y1="16" x2="28" y2="48" stroke="#1e293b" strokeWidth="3" />
-          <line x1="36" y1="16" x2="36" y2="48" stroke="#1e293b" strokeWidth="3" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          <line x1="0" y1="32" x2="22" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="42" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Capacitor Body (Electrolytic style) */}
+          <rect x="22" y="16" width="20" height="32" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+          
+          {/* Negative Stripe */}
+          <rect x="36" y="16" width="6" height="32" fill="#cbd5e1" />
+          <line x1="38" y1="20" x2="38" y2="24" stroke="#0f172a" strokeWidth="1.5" />
+          <line x1="38" y1="40" x2="38" y2="44" stroke="#0f172a" strokeWidth="1.5" />
+          
+          {/* 3D Highlight */}
+          <rect x="24" y="16" width="4" height="32" fill="white" opacity="0.2" />
+          
+          {/* Top Cap */}
+          <ellipse cx="32" cy="16" rx="10" ry="3" fill="#334155" />
+          <path d="M 28 16 L 36 16 M 32 12 L 32 20" stroke="#0f172a" strokeWidth="0.5" opacity="0.5" />
         </svg>
       )}
       {type === 'inductor' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
           <line x1="0" y1="32" x2="12" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="52" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <path d="M 12 32 A 5 5 0 1 1 22 32 A 5 5 0 1 1 32 32 A 5 5 0 1 1 42 32 A 5 5 0 1 1 52 32" fill="none" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Core */}
+          <rect x="14" y="28" width="36" height="8" rx="2" fill="#334155" />
+          
+          {/* Coils */}
+          <path d="M 12 32 C 12 20, 22 20, 22 32 C 22 44, 32 44, 32 32 C 32 20, 42 20, 42 32 C 42 44, 52 44, 52 32" fill="none" stroke="#b45309" strokeWidth="3" strokeLinecap="round" />
+          
+          {/* 3D Highlight on coils */}
+          <path d="M 12 32 C 12 22, 20 22, 20 32 C 20 42, 30 42, 30 32 C 30 22, 40 22, 40 32 C 40 42, 50 42, 50 32" fill="none" stroke="#f59e0b" strokeWidth="1" opacity="0.8" />
         </svg>
       )}
       {type === 'diode' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
           <line x1="0" y1="32" x2="20" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="44" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="20,16 44,32 20,48" fill="#1e293b" />
-          <line x1="44" y1="16" x2="44" y2="48" stroke="#1e293b" strokeWidth="3" />
+          
+          {/* Diode Body */}
+          <rect x="20" y="24" width="24" height="16" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          
+          {/* Cathode Stripe */}
+          <rect x="38" y="24" width="4" height="16" fill="#cbd5e1" />
+          
+          {/* 3D Highlight */}
+          <rect x="20" y="26" width="24" height="4" fill="white" opacity="0.2" rx="1" />
+          <rect x="20" y="36" width="24" height="2" fill="black" opacity="0.3" rx="1" />
         </svg>
       )}
       {type === 'ac_source' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="32" cy="32" r="16" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <path d="M 22 32 Q 27 22 32 32 T 42 32" fill="none" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Generator Body */}
+          <circle cx="32" cy="32" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+          <circle cx="32" cy="32" r="12" fill="none" stroke="#cbd5e1" strokeWidth="1" />
+          
+          {/* Sine Wave */}
+          <path d="M 22 32 Q 27 22 32 32 T 42 32" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
+          
+          {/* Terminals */}
+          <circle cx="16" cy="32" r="2" fill="#1e293b" />
+          <circle cx="48" cy="32" r="2" fill="#1e293b" />
         </svg>
       )}
       {type === 'clock' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <rect x="16" y="16" width="32" height="32" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="2" />
-          <path d="M 22 40 L 22 24 L 32 24 L 32 40 L 42 40 L 42 24" fill="none" stroke="#ef4444" strokeWidth="2" />
+          
+          {/* Signal Generator Body */}
+          <rect x="16" y="16" width="32" height="32" rx="4" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+          <rect x="20" y="20" width="24" height="14" rx="1" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1" />
+          
+          {/* Square Wave */}
+          <path d="M 22 30 L 22 24 L 32 24 L 32 30 L 42 30 L 42 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinejoin="round" />
+          
+          {/* Terminals */}
+          <circle cx="16" cy="32" r="2" fill="#1e293b" />
+          <circle cx="48" cy="32" r="2" fill="#1e293b" />
+          
+          {/* LED indicator */}
+          <circle cx="32" cy="42" r="2" fill={component.value > 0 ? "#22c55e" : "#94a3b8"} />
         </svg>
       )}
 
       {type === 'battery' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <line x1="32" y1="0" x2="32" y2="16" stroke="#1e293b" strokeWidth="2" />
-          <line x1="32" y1="48" x2="32" y2="64" stroke="#1e293b" strokeWidth="2" />
-          <rect x="20" y="16" width="24" height="32" rx="2" fill="#334155" />
-          <rect x="20" y="16" width="24" height="6" fill="#ef4444" />
-          <text x="32" y="12" fontSize="10" fill="#ef4444" textAnchor="middle" fontWeight="bold">+</text>
-          <text x="32" y="58" fontSize="10" fill="#1e293b" textAnchor="middle" fontWeight="bold">-</text>
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          <line x1="32" y1="0" x2="32" y2="12" stroke="#1e293b" strokeWidth="2" />
+          <line x1="32" y1="52" x2="32" y2="64" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Battery Body */}
+          <rect x="20" y="16" width="24" height="32" rx="3" fill="url(#batteryGrad)" stroke="#1e293b" strokeWidth="1.5" />
+          
+          {/* Positive Terminal (Top) */}
+          <rect x="26" y="12" width="12" height="4" rx="1" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1" />
+          
+          {/* Battery Label/Wrapper */}
+          <rect x="20" y="22" width="24" height="20" fill="#ef4444" />
+          <rect x="20" y="42" width="24" height="6" fill="#1e293b" />
+          
+          {/* Highlights/Shadows for 3D effect */}
+          <rect x="22" y="16" width="4" height="32" fill="white" opacity="0.3" />
+          <rect x="38" y="16" width="4" height="32" fill="black" opacity="0.2" />
+          
+          <text x="32" y="34" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold" fontFamily="sans-serif">+</text>
+          
+          <defs>
+            <linearGradient id="batteryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#e2e8f0" />
+              <stop offset="50%" stopColor="#f8fafc" />
+              <stop offset="100%" stopColor="#94a3b8" />
+            </linearGradient>
+          </defs>
         </svg>
       )}
       {type === 'resistor' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <rect x="16" y="24" width="32" height="16" rx="4" fill="#e2e8f0" stroke="#1e293b" strokeWidth="2" />
-          <rect x="20" y="24" width="4" height="16" fill={getResistorColors(value)[0] || '#000'} />
-          <rect x="28" y="24" width="4" height="16" fill={getResistorColors(value)[1] || '#000'} />
-          <rect x="36" y="24" width="4" height="16" fill={getResistorColors(value)[2] || '#000'} />
-          <rect x="44" y="24" width="2" height="16" fill="#d4af37" />
+          
+          {/* Resistor Body (Bone shape) */}
+          <path d="M 16 26 C 16 22, 20 22, 20 26 L 20 38 C 20 42, 16 42, 16 38 Z" fill="#e2ceb5" stroke="#8b7355" strokeWidth="1" />
+          <rect x="19" y="25" width="26" height="14" fill="#e2ceb5" stroke="#8b7355" strokeWidth="1" strokeDasharray="26 0 26 0" />
+          <path d="M 48 26 C 48 22, 44 22, 44 26 L 44 38 C 44 42, 48 42, 48 38 Z" fill="#e2ceb5" stroke="#8b7355" strokeWidth="1" />
+          
+          {/* Color Bands */}
+          <rect x="22" y="25.5" width="3" height="13" fill={getResistorColors(value)[0] || '#000'} />
+          <rect x="28" y="25.5" width="3" height="13" fill={getResistorColors(value)[1] || '#000'} />
+          <rect x="34" y="25.5" width="3" height="13" fill={getResistorColors(value)[2] || '#000'} />
+          <rect x="40" y="25.5" width="2" height="13" fill="#d4af37" /> {/* Gold tolerance */}
+          
+          {/* 3D Highlight */}
+          <rect x="16" y="26" width="32" height="4" fill="white" opacity="0.4" rx="2" />
         </svg>
       )}
       {type === 'lamp' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full overflow-visible">
-          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="32" cy="32" r="16" fill={Math.abs(component.current) > 0.01 ? '#fef08a' : '#f1f5f9'} stroke="#1e293b" strokeWidth="2" />
-          <path d="M 24 24 L 40 40 M 24 40 L 40 24" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full overflow-visible drop-shadow-md">
+          <line x1="0" y1="32" x2="24" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="40" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Base/Socket */}
+          <rect x="24" y="26" width="16" height="12" rx="1" fill="#94a3b8" stroke="#475569" strokeWidth="1" />
+          <line x1="26" y1="28" x2="38" y2="28" stroke="#475569" strokeWidth="1" />
+          <line x1="26" y1="32" x2="38" y2="32" stroke="#475569" strokeWidth="1" />
+          <line x1="26" y1="36" x2="38" y2="36" stroke="#475569" strokeWidth="1" />
+          
+          {/* Glass Bulb */}
+          <path d="M 32 4 C 46 4, 50 16, 40 26 L 24 26 C 14 16, 18 4, 32 4 Z" 
+                fill={Math.abs(component.current) > 0.01 ? '#fef08a' : '#f8fafc'} 
+                stroke="#cbd5e1" strokeWidth="1.5" opacity="0.9" />
+                
+          {/* Filament */}
+          <path d="M 28 26 L 28 16 L 30 14 L 32 16 L 34 14 L 36 16 L 36 26" 
+                fill="none" 
+                stroke={Math.abs(component.current) > 0.01 ? '#f97316' : '#64748b'} 
+                strokeWidth="1.5" strokeLinejoin="round" />
+                
+          {/* Glass Highlight */}
+          <path d="M 24 12 C 26 6, 30 6, 32 6" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+
+          {/* Glow Effect */}
           {Math.abs(component.current) > 0.01 && (
-            <circle cx="32" cy="32" r="24" fill="#facc15" opacity="0.4" filter="blur(8px)" />
+            <circle cx="32" cy="16" r="24" fill="#facc15" opacity="0.5" filter="blur(8px)" />
           )}
         </svg>
       )}
       {type === 'switch' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <line x1="0" y1="32" x2="20" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="44" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="20" cy="32" r="3" fill="#1e293b" />
-          <circle cx="44" cy="32" r="3" fill="#1e293b" />
-          <line x1="20" y1="32" x2="42" y2={component.isOpen ? 16 : 32} stroke="#1e293b" strokeWidth="2" className="transition-all duration-200" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Terminals */}
+          <circle cx="16" cy="32" r="4" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1.5" />
+          <circle cx="48" cy="32" r="4" fill="#cbd5e1" stroke="#1e293b" strokeWidth="1.5" />
+          <circle cx="16" cy="32" r="1.5" fill="#1e293b" />
+          <circle cx="48" cy="32" r="1.5" fill="#1e293b" />
+          
+          {/* Switch Blade */}
+          <g className="transition-all duration-200 origin-[16px_32px]" style={{ transform: component.isOpen ? 'rotate(-30deg)' : 'rotate(0deg)' }}>
+            <rect x="16" y="30" width="34" height="4" rx="2" fill="#ef4444" stroke="#991b1b" strokeWidth="1" />
+            <rect x="18" y="30.5" width="30" height="1.5" fill="white" opacity="0.4" />
+          </g>
         </svg>
       )}
       {type === 'voltmeter' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="32" cy="32" r="16" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <text x="32" y="36" fontSize="12" fill="#1e293b" textAnchor="middle" fontWeight="bold">V</text>
-          <text x="32" y="46" fontSize="8" fill="#3b82f6" textAnchor="middle" fontWeight="bold">{Math.abs(component.voltageDrop).toFixed(1)}V</text>
+          
+          {/* Meter Body */}
+          <circle cx="32" cy="32" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+          <circle cx="32" cy="32" r="14" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+          
+          {/* Needle */}
+          <g style={{ transform: `rotate(${Math.min(Math.max((Math.abs(component.voltageDrop) / 12) * 90 - 45, -45), 45)}deg)`, transformOrigin: '32px 40px' }} className="transition-transform duration-300">
+            <line x1="32" y1="40" x2="32" y2="20" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="32" cy="40" r="2" fill="#1e293b" />
+          </g>
+          
+          {/* Scale marks */}
+          <path d="M 22 24 A 12 12 0 0 1 42 24" fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 4" />
+          
+          <text x="32" y="34" fontSize="8" fill="#1e293b" textAnchor="middle" fontWeight="bold">V</text>
+          <text x="32" y="44" fontSize="6" fill="#3b82f6" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{Math.abs(component.voltageDrop).toFixed(1)}V</text>
         </svg>
       )}
       {type === 'ammeter' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="32" cy="32" r="16" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <text x="32" y="36" fontSize="12" fill="#1e293b" textAnchor="middle" fontWeight="bold">A</text>
-          <text x="32" y="46" fontSize="8" fill="#3b82f6" textAnchor="middle" fontWeight="bold">{Math.abs(component.current).toFixed(2)}A</text>
+          
+          {/* Meter Body */}
+          <circle cx="32" cy="32" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+          <circle cx="32" cy="32" r="14" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+          
+          {/* Needle */}
+          <g style={{ transform: `rotate(${Math.min(Math.max((Math.abs(component.current) / 2) * 90 - 45, -45), 45)}deg)`, transformOrigin: '32px 40px' }} className="transition-transform duration-300">
+            <line x1="32" y1="40" x2="32" y2="20" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="32" cy="40" r="2" fill="#1e293b" />
+          </g>
+          
+          {/* Scale marks */}
+          <path d="M 22 24 A 12 12 0 0 1 42 24" fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 4" />
+          
+          <text x="32" y="34" fontSize="8" fill="#1e293b" textAnchor="middle" fontWeight="bold">A</text>
+          <text x="32" y="44" fontSize="6" fill="#3b82f6" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{Math.abs(component.current).toFixed(2)}A</text>
         </svg>
       )}
       {type === 'multimeter' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <rect x="16" y="16" width="32" height="32" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="2" />
-          <rect x="20" y="20" width="24" height="12" rx="2" fill="#a7f3d0" stroke="#064e3b" strokeWidth="1" />
-          <text x="32" y="29" fontSize="8" fill="#064e3b" textAnchor="middle" fontWeight="bold" fontFamily="monospace">
+          
+          {/* Multimeter Body */}
+          <rect x="16" y="12" width="32" height="40" rx="3" fill="#facc15" stroke="#ca8a04" strokeWidth="1" />
+          <rect x="18" y="14" width="28" height="36" rx="2" fill="#334155" />
+          
+          {/* Screen */}
+          <rect x="20" y="16" width="24" height="14" rx="1" fill="#a7f3d0" stroke="#064e3b" strokeWidth="1" />
+          <text x="32" y="26" fontSize="8" fill="#064e3b" textAnchor="middle" fontWeight="bold" fontFamily="monospace">
             {component.mode === 'current' ? `${Math.abs(component.current).toFixed(2)}A` :
              component.mode === 'resistance' ? (Math.abs(component.current) > 1e-6 ? `${(Math.abs(component.voltageDrop) / Math.abs(component.current)).toFixed(1)}Ω` : 'O.L') :
              `${Math.abs(component.voltageDrop).toFixed(1)}V`}
           </text>
-          <circle cx="24" cy="40" r="3" fill="#ef4444" />
-          <circle cx="40" cy="40" r="3" fill="#1e293b" />
+          
+          {/* Dial */}
+          <circle cx="32" cy="38" r="6" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+          <line x1="32" y1="38" x2="32" y2="33" stroke="white" strokeWidth="1.5" />
+          
+          {/* Ports */}
+          <circle cx="24" cy="46" r="2.5" fill="#ef4444" stroke="#7f1d1d" strokeWidth="0.5" />
+          <circle cx="40" cy="46" r="2.5" fill="#1e293b" stroke="black" strokeWidth="0.5" />
         </svg>
       )}
       {type === 'wattmeter' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="32" cy="32" r="16" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <text x="32" y="36" fontSize="12" fill="#1e293b" textAnchor="middle" fontWeight="bold">W</text>
-          <text x="32" y="46" fontSize="8" fill="#eab308" textAnchor="middle" fontWeight="bold">{Math.abs(component.voltageDrop * component.current).toFixed(1)}W</text>
+          
+          {/* Meter Body */}
+          <rect x="16" y="16" width="32" height="32" rx="2" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
+          
+          {/* Display */}
+          <rect x="20" y="20" width="24" height="14" rx="1" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1" />
+          
+          <text x="32" y="30" fontSize="8" fill="#eab308" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{Math.abs(component.voltageDrop * component.current).toFixed(1)}W</text>
+          
+          {/* Label */}
+          <text x="32" y="44" fontSize="8" fill="#1e293b" textAnchor="middle" fontWeight="bold">POWER</text>
         </svg>
       )}
       
       {type === 'potentiometer' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <rect x="16" y="24" width="32" height="16" rx="2" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="32" y1="0" x2="32" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="32,24 28,18 36,18" fill="#1e293b" />
+          
+          {/* Base */}
+          <circle cx="32" cy="32" r="16" fill="#334155" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Knob */}
+          <circle cx="32" cy="32" r="12" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1" />
+          
+          {/* Wiper Indicator */}
+          <g style={{ transform: `rotate(${((component.value || 0) / 1000) * 270 - 135}deg)`, transformOrigin: '32px 32px' }}>
+            <line x1="32" y1="32" x2="32" y2="22" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="32" cy="32" r="2" fill="#ef4444" />
+          </g>
+          
+          {/* 3D Highlight */}
+          <path d="M 20 32 A 12 12 0 0 1 44 32" fill="none" stroke="white" strokeWidth="2" opacity="0.5" />
         </svg>
       )}
       {type === 'fuse' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
           <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
           <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <rect x="16" y="24" width="32" height="16" rx="2" fill="white" stroke={component.isBroken ? "#ef4444" : "#1e293b"} strokeWidth="2" />
+          
+          {/* Glass Tube */}
+          <rect x="16" y="24" width="32" height="16" rx="2" fill="#f1f5f9" fillOpacity="0.6" stroke="#94a3b8" strokeWidth="1" />
+          
+          {/* Metal Caps */}
+          <rect x="16" y="22" width="6" height="20" rx="1" fill="#cbd5e1" stroke="#64748b" strokeWidth="1" />
+          <rect x="42" y="22" width="6" height="20" rx="1" fill="#cbd5e1" stroke="#64748b" strokeWidth="1" />
+          
+          {/* 3D Highlight on caps */}
+          <rect x="17" y="23" width="2" height="18" fill="white" opacity="0.5" />
+          <rect x="43" y="23" width="2" height="18" fill="white" opacity="0.5" />
+          
+          {/* Fuse Wire */}
           {!component.isBroken ? (
-            <line x1="16" y1="32" x2="48" y2="32" stroke="#1e293b" strokeWidth="2" />
+            <path d="M 22 32 Q 32 24 42 32" fill="none" stroke="#64748b" strokeWidth="1.5" />
           ) : (
             <>
-              <line x1="16" y1="32" x2="28" y2="32" stroke="#1e293b" strokeWidth="2" />
-              <line x1="36" y1="32" x2="48" y2="32" stroke="#1e293b" strokeWidth="2" />
-              <path d="M 28 30 L 32 34 M 32 30 L 28 34" stroke="#ef4444" strokeWidth="2" />
+              <path d="M 22 32 Q 26 28 28 30" fill="none" stroke="#64748b" strokeWidth="1.5" />
+              <path d="M 42 32 Q 38 28 36 30" fill="none" stroke="#64748b" strokeWidth="1.5" />
+              {/* Burn mark */}
+              <circle cx="32" cy="32" r="4" fill="#ef4444" opacity="0.4" filter="blur(1px)" />
+              <path d="M 30 30 L 34 34 M 34 30 L 30 34" stroke="#ef4444" strokeWidth="1.5" />
             </>
           )}
+          
+          {/* Glass Reflection */}
+          <rect x="22" y="26" width="20" height="3" fill="white" opacity="0.4" rx="1" />
         </svg>
       )}
       {type === 'led' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full overflow-visible">
-          <line x1="0" y1="32" x2="20" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="44" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="20,16 44,32 20,48" fill={Math.abs(component.current) > 0.001 ? (component.color || '#ef4444') : '#1e293b'} />
-          <line x1="44" y1="16" x2="44" y2="48" stroke={Math.abs(component.current) > 0.001 ? (component.color || '#ef4444') : '#1e293b'} strokeWidth="3" />
-          {/* Arrows */}
-          <line x1="30" y1="14" x2="40" y2="4" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="40,4 34,4 40,10" fill="#1e293b" />
-          <line x1="40" y1="20" x2="50" y2="10" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="50,10 44,10 50,16" fill="#1e293b" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full overflow-visible drop-shadow-md">
+          <line x1="0" y1="32" x2="24" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="40" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* LED Legs */}
+          <line x1="28" y1="32" x2="28" y2="24" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="36" y1="32" x2="36" y2="24" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* LED Base Rim */}
+          <rect x="24" y="22" width="16" height="4" rx="1" fill={component.color || '#ef4444'} opacity="0.8" stroke="#1e293b" strokeWidth="1" />
+          
+          {/* LED Dome */}
+          <path d="M 25 22 L 25 12 C 25 4, 39 4, 39 12 L 39 22 Z" 
+                fill={Math.abs(component.current) > 0.001 ? (component.color || '#ef4444') : '#f8fafc'} 
+                stroke={component.color || '#ef4444'} strokeWidth="1" opacity={Math.abs(component.current) > 0.001 ? 1 : 0.6} />
+                
+          {/* Internal Anode/Cathode */}
+          <path d="M 28 22 L 28 14 L 30 14" fill="none" stroke="#64748b" strokeWidth="1.5" />
+          <path d="M 36 22 L 36 12 L 32 12 L 32 16 L 36 16" fill="none" stroke="#64748b" strokeWidth="1.5" />
+
+          {/* Glass Highlight */}
+          <path d="M 27 18 L 27 10 C 27 6, 31 6, 31 6" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+
+          {/* Glow Effect */}
           {Math.abs(component.current) > 0.001 && (
-            <circle cx="32" cy="32" r="24" fill={component.color || '#ef4444'} opacity="0.3" filter="blur(4px)" />
+            <circle cx="32" cy="14" r="20" fill={component.color || '#ef4444'} opacity="0.4" filter="blur(6px)" />
           )}
         </svg>
       )}
@@ -237,6 +453,77 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
         <div className="whitespace-nowrap font-sans text-slate-800 font-medium select-none pointer-events-none">
            {component.text || 'Text'}
         </div>
+      )}
+
+      {type === 'solar_panel' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Panel Body */}
+          <rect x="16" y="16" width="32" height="32" rx="2" fill="#1e40af" stroke="#1e3a8a" strokeWidth="2" />
+          
+          {/* Grid lines */}
+          <line x1="24" y1="16" x2="24" y2="48" stroke="#60a5fa" strokeWidth="1" opacity="0.6" />
+          <line x1="32" y1="16" x2="32" y2="48" stroke="#60a5fa" strokeWidth="1" opacity="0.6" />
+          <line x1="40" y1="16" x2="40" y2="48" stroke="#60a5fa" strokeWidth="1" opacity="0.6" />
+          
+          <line x1="16" y1="24" x2="48" y2="24" stroke="#60a5fa" strokeWidth="1" opacity="0.6" />
+          <line x1="16" y1="32" x2="48" y2="32" stroke="#60a5fa" strokeWidth="1" opacity="0.6" />
+          <line x1="16" y1="40" x2="48" y2="40" stroke="#60a5fa" strokeWidth="1" opacity="0.6" />
+          
+          {/* Terminals */}
+          <circle cx="16" cy="32" r="2" fill="#1e293b" />
+          <circle cx="48" cy="32" r="2" fill="#1e293b" />
+          
+          {/* Sun icon hint */}
+          <circle cx="22" cy="22" r="3" fill="#fde047" opacity="0.8" />
+        </svg>
+      )}
+
+      {type === 'wind_turbine' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Tower */}
+          <path d="M 30 56 L 34 56 L 33 32 L 31 32 Z" fill="#94a3b8" stroke="#475569" strokeWidth="1" />
+          
+          {/* Nacelle */}
+          <rect x="28" y="28" width="12" height="6" rx="2" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1" />
+          
+          {/* Blades (rotating based on value or just static) */}
+          <g className="origin-[30px_31px] animate-[spin_3s_linear_infinite]">
+            <path d="M 30 31 L 34 16 C 32 14, 28 14, 26 16 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <path d="M 30 31 L 44 38 C 45 40, 44 44, 42 45 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <path d="M 30 31 L 16 38 C 15 40, 16 44, 18 45 Z" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <circle cx="30" cy="31" r="2" fill="#64748b" />
+          </g>
+        </svg>
+      )}
+
+      {type === 'thermoelectric_generator' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Hot side */}
+          <rect x="16" y="16" width="32" height="8" fill="#ef4444" stroke="#b91c1c" strokeWidth="1" />
+          
+          {/* TEG Modules */}
+          <rect x="18" y="24" width="28" height="16" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+          <rect x="20" y="26" width="4" height="12" fill="#3b82f6" />
+          <rect x="26" y="26" width="4" height="12" fill="#ef4444" />
+          <rect x="32" y="26" width="4" height="12" fill="#3b82f6" />
+          <rect x="38" y="26" width="4" height="12" fill="#ef4444" />
+          
+          {/* Cold side */}
+          <rect x="16" y="40" width="32" height="8" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1" />
+          
+          {/* Terminals */}
+          <circle cx="16" cy="32" r="2" fill="#1e293b" />
+          <circle cx="48" cy="32" r="2" fill="#1e293b" />
+        </svg>
       )}
 
       {type === 'seven_segment' && (
@@ -320,91 +607,167 @@ const ComponentVisual = React.memo(({ component, isSelected, onToggle }: { compo
       )}
 
       {type === 'npn_transistor' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <circle cx="36" cy="32" r="20" fill="white" stroke="#1e293b" strokeWidth="1" />
-          <line x1="0" y1="32" x2="24" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="24" y1="16" x2="24" y2="48" stroke="#1e293b" strokeWidth="3" />
-          <line x1="24" y1="24" x2="52" y2="12" stroke="#1e293b" strokeWidth="2" />
-          <line x1="52" y1="12" x2="64" y2="12" stroke="#1e293b" strokeWidth="2" />
-          <line x1="24" y1="40" x2="52" y2="52" stroke="#1e293b" strokeWidth="2" />
-          <line x1="52" y1="52" x2="64" y2="52" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="48,50 40,42 38,48" fill="#1e293b" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          {/* Legs */}
+          <line x1="0" y1="32" x2="24" y2="32" stroke="#94a3b8" strokeWidth="2" /> {/* Base */}
+          <line x1="32" y1="0" x2="32" y2="20" stroke="#94a3b8" strokeWidth="2" /> {/* Collector */}
+          <line x1="32" y1="44" x2="32" y2="64" stroke="#94a3b8" strokeWidth="2" /> {/* Emitter */}
+          
+          {/* Body (TO-92 package style) */}
+          <path d="M 20 20 L 44 20 C 48 20, 52 26, 52 32 C 52 38, 48 44, 44 44 L 20 44 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          
+          {/* Flat face */}
+          <rect x="20" y="20" width="6" height="24" fill="#334155" />
+          
+          {/* 3D Highlight */}
+          <path d="M 26 22 L 42 22 C 45 22, 48 26, 48 32 C 48 38, 45 42, 42 42 L 26 42 Z" fill="white" opacity="0.1" />
+          
+          {/* Labels */}
+          <text x="14" y="30" fontSize="8" fill="#64748b" fontFamily="sans-serif">B</text>
+          <text x="36" y="14" fontSize="8" fill="#64748b" fontFamily="sans-serif">C</text>
+          <text x="36" y="56" fontSize="8" fill="#64748b" fontFamily="sans-serif">E</text>
         </svg>
       )}
 
       {type === 'pnp_transistor' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <circle cx="36" cy="32" r="20" fill="white" stroke="#1e293b" strokeWidth="1" />
-          <line x1="0" y1="32" x2="24" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="24" y1="16" x2="24" y2="48" stroke="#1e293b" strokeWidth="3" />
-          <line x1="24" y1="24" x2="52" y2="12" stroke="#1e293b" strokeWidth="2" />
-          <line x1="52" y1="12" x2="64" y2="12" stroke="#1e293b" strokeWidth="2" />
-          <line x1="24" y1="40" x2="52" y2="52" stroke="#1e293b" strokeWidth="2" />
-          <line x1="52" y1="52" x2="64" y2="52" stroke="#1e293b" strokeWidth="2" />
-          <polygon points="30,42 38,38 32,48" fill="#1e293b" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          {/* Legs */}
+          <line x1="0" y1="32" x2="24" y2="32" stroke="#94a3b8" strokeWidth="2" /> {/* Base */}
+          <line x1="32" y1="0" x2="32" y2="20" stroke="#94a3b8" strokeWidth="2" /> {/* Emitter */}
+          <line x1="32" y1="44" x2="32" y2="64" stroke="#94a3b8" strokeWidth="2" /> {/* Collector */}
+          
+          {/* Body (TO-92 package style) */}
+          <path d="M 20 20 L 44 20 C 48 20, 52 26, 52 32 C 52 38, 48 44, 44 44 L 20 44 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          
+          {/* Flat face */}
+          <rect x="20" y="20" width="6" height="24" fill="#334155" />
+          
+          {/* 3D Highlight */}
+          <path d="M 26 22 L 42 22 C 45 22, 48 26, 48 32 C 48 38, 45 42, 42 42 L 26 42 Z" fill="white" opacity="0.1" />
+          
+          {/* Labels */}
+          <text x="14" y="30" fontSize="8" fill="#64748b" fontFamily="sans-serif">B</text>
+          <text x="36" y="14" fontSize="8" fill="#64748b" fontFamily="sans-serif">E</text>
+          <text x="36" y="56" fontSize="8" fill="#64748b" fontFamily="sans-serif">C</text>
         </svg>
       )}
 
       {type === 'opamp' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <polygon points="16,12 16,52 56,32" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
-          <line x1="56" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <text x="20" y="24" fontSize="10" fill="#1e293b" fontWeight="bold">-</text>
-          <text x="20" y="48" fontSize="10" fill="#1e293b" fontWeight="bold">+</text>
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <circle cx="22" cy="18" r="2" fill="#334155" /> {/* Pin 1 indicator */}
+          
+          {/* Pins */}
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#94a3b8" strokeWidth="2" /> {/* Inverting (-) */}
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#94a3b8" strokeWidth="2" /> {/* Non-inverting (+) */}
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" /> {/* Output */}
+          
+          {/* Symbol */}
+          <polygon points="22,20 22,44 42,32" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="26" y="26" fontSize="8" fill="#94a3b8" fontWeight="bold">-</text>
+          <text x="26" y="42" fontSize="8" fill="#94a3b8" fontWeight="bold">+</text>
+          <text x="32" y="50" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">OP-AMP</text>
         </svg>
       )}
 
       {type === 'and_gate' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <path d="M 16 12 V 52 H 32 A 20 20 0 0 0 32 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
-          <line x1="52" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <path d="M 16 28 A 4 4 0 0 1 16 36" fill="#0f172a" /> {/* Notch */}
+          
+          {/* Pins */}
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* Symbol */}
+          <path d="M 24 24 V 40 H 32 A 8 8 0 0 0 32 24 Z" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="32" y="48" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">AND</text>
         </svg>
       )}
       {type === 'nand_gate' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <path d="M 16 12 V 52 H 32 A 20 20 0 0 0 32 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
-          <line x1="58" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="55" cy="32" r="3" fill="white" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <path d="M 16 28 A 4 4 0 0 1 16 36" fill="#0f172a" /> {/* Notch */}
+          
+          {/* Pins */}
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* Symbol */}
+          <path d="M 22 24 V 40 H 30 A 8 8 0 0 0 30 24 Z" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <circle cx="40" cy="32" r="2" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="32" y="48" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">NAND</text>
         </svg>
       )}
       {type === 'or_gate' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <path d="M 16 12 Q 24 32 16 52 Q 40 52 52 32 Q 40 12 16 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="20" x2="18" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="44" x2="18" y2="44" stroke="#1e293b" strokeWidth="2" />
-          <line x1="52" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <path d="M 16 28 A 4 4 0 0 1 16 36" fill="#0f172a" /> {/* Notch */}
+          
+          {/* Pins */}
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* Symbol */}
+          <path d="M 22 24 Q 26 32 22 40 Q 34 40 40 32 Q 34 24 22 24 Z" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="32" y="48" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">OR</text>
         </svg>
       )}
       {type === 'nor_gate' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <path d="M 16 12 Q 24 32 16 52 Q 40 52 52 32 Q 40 12 16 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="20" x2="18" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="44" x2="18" y2="44" stroke="#1e293b" strokeWidth="2" />
-          <line x1="58" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="55" cy="32" r="3" fill="white" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <path d="M 16 28 A 4 4 0 0 1 16 36" fill="#0f172a" /> {/* Notch */}
+          
+          {/* Pins */}
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* Symbol */}
+          <path d="M 20 24 Q 24 32 20 40 Q 32 40 38 32 Q 32 24 20 24 Z" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <circle cx="40" cy="32" r="2" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="32" y="48" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">NOR</text>
         </svg>
       )}
       {type === 'xor_gate' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <path d="M 20 12 Q 28 32 20 52 Q 44 52 56 32 Q 44 12 20 12 Z" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <path d="M 12 12 Q 20 32 12 52" fill="none" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="20" x2="16" y2="20" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="44" x2="16" y2="44" stroke="#1e293b" strokeWidth="2" />
-          <line x1="56" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <path d="M 16 28 A 4 4 0 0 1 16 36" fill="#0f172a" /> {/* Notch */}
+          
+          {/* Pins */}
+          <line x1="0" y1="20" x2="16" y2="20" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="0" y1="44" x2="16" y2="44" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* Symbol */}
+          <path d="M 24 24 Q 28 32 24 40 Q 36 40 42 32 Q 36 24 24 24 Z" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <path d="M 20 24 Q 24 32 20 40" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="32" y="48" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">XOR</text>
         </svg>
       )}
       {type === 'not_gate' && (
-        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full">
-          <polygon points="16,16 16,48 48,32" fill="white" stroke="#1e293b" strokeWidth="2" />
-          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <line x1="54" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="51" cy="32" r="3" fill="white" stroke="#1e293b" strokeWidth="2" />
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-sm">
+          {/* IC Body */}
+          <rect x="16" y="12" width="32" height="40" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+          <path d="M 16 28 A 4 4 0 0 1 16 36" fill="#0f172a" /> {/* Notch */}
+          
+          {/* Pins */}
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#94a3b8" strokeWidth="2" />
+          
+          {/* Symbol */}
+          <polygon points="24,24 24,40 38,32" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <circle cx="40" cy="32" r="2" fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+          <text x="32" y="48" fontSize="6" fill="#64748b" textAnchor="middle" fontFamily="monospace">NOT</text>
         </svg>
       )}
       

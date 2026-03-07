@@ -1,0 +1,9 @@
+node_modules/@reduxjs/toolkit/src/query/core/buildMiddleware/windowEventHandling.ts:        const shouldRefetch =
+node_modules/@reduxjs/toolkit/src/query/core/buildThunks.ts:        const isForcedQueryNeedingRefetch = // arg.forceRefetch
+node_modules/@reduxjs/toolkit/src/query/core/buildThunks.ts:  const prefetch =
+node_modules/@reduxjs/toolkit/src/query/tests/infiniteQueries.test.ts:    const pokemonApiWithRefetch = createApi({
+node_modules/@reduxjs/toolkit/src/query/tests/buildHooks.test.tsx:    const pokemonApiWithRefetch = createApi({
+node_modules/@reduxjs/toolkit/src/query/tests/buildHooks.test.tsx:      const handleRefetch = async () => {
+node_modules/@reduxjs/toolkit/src/query/react/buildHooks.ts:      const refetch = useCallback(
+node_modules/@reduxjs/toolkit/src/query/fetchBaseQuery.ts:const defaultFetchFn: typeof fetch = (...args) => fetch(...args)
+node_modules/@reduxjs/toolkit/src/query/fetchBaseQuery.ts:  if (typeof fetch === 'undefined' && fetchFn === defaultFetchFn) {

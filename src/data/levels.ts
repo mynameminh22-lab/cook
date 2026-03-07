@@ -383,82 +383,88 @@ export const LEVELS: Level[] = [
   },
   {
     id: 106,
-    title: "Sửa mạch 6: Lỗi ngẫu nhiên 6",
-    description: "Mạch điện đang gặp sự cố. Hãy tìm và sửa lỗi để mạch hoạt động bình thường.",
-    difficulty: 'Easy',
+    title: "Sửa mạch 6: Đèn LED cháy",
+    description: "Đèn LED đang bị nối trực tiếp với nguồn 9V và sẽ bị cháy. Hãy thêm một điện trở (khoảng 330Ω) nối tiếp để bảo vệ LED.",
+    difficulty: 'Medium',
     category: 'repair',
     maxScore: 160,
     setup: () => createBaseState([
       spawn('battery', 200, 300, 9),
-      spawn('lamp', 500, 300, 10, undefined, true)
+      spawn('led', 500, 300, 10, 2) // LED with 2V rating
     ]),
     checkWin: (state) => {
-      const lamp = state.components.find(c => c.type === 'lamp');
-      return !!lamp && !lamp.isBroken && Math.abs(lamp.current || 0) > 0.01;
+      const led = state.components.find(c => c.type === 'led');
+      const resistor = state.components.find(c => c.type === 'resistor');
+      return !!led && !led.isBroken && !!resistor && Math.abs(led.current || 0) > 0.001 && Math.abs(led.current || 0) < 0.05;
     }
   },
   {
     id: 107,
-    title: "Sửa mạch 7: Lỗi ngẫu nhiên 7",
-    description: "Mạch điện đang gặp sự cố. Hãy tìm và sửa lỗi để mạch hoạt động bình thường.",
-    difficulty: 'Easy',
+    title: "Sửa mạch 7: Đèn quá tối",
+    description: "Bóng đèn sáng rất yếu vì nguồn điện không đủ. Hãy thay thế nguồn điện hoặc mắc thêm pin nối tiếp để tăng điện áp.",
+    difficulty: 'Medium',
     category: 'repair',
     maxScore: 170,
     setup: () => createBaseState([
-      spawn('battery', 200, 300, 9),
-      spawn('lamp', 500, 300, 10, undefined, true)
+      spawn('battery', 200, 300, 1.5),
+      spawn('lamp', 500, 300, 10)
     ]),
     checkWin: (state) => {
       const lamp = state.components.find(c => c.type === 'lamp');
-      return !!lamp && !lamp.isBroken && Math.abs(lamp.current || 0) > 0.01;
+      return !!lamp && Math.abs(lamp.voltageDrop || 0) >= 3;
     }
   },
   {
     id: 108,
-    title: "Sửa mạch 8: Lỗi ngẫu nhiên 8",
-    description: "Mạch điện đang gặp sự cố. Hãy tìm và sửa lỗi để mạch hoạt động bình thường.",
-    difficulty: 'Easy',
+    title: "Sửa mạch 8: Công tắc không tác dụng",
+    description: "Đèn luôn sáng dù công tắc đang mở. Hãy kiểm tra và loại bỏ dây dẫn bị nối tắt (ngắn mạch) qua công tắc.",
+    difficulty: 'Medium',
     category: 'repair',
     maxScore: 180,
     setup: () => createBaseState([
-      spawn('battery', 200, 300, 9),
-      spawn('lamp', 500, 300, 10, undefined, true)
+      spawn('battery', 200, 300, 12),
+      spawn('switch', 350, 300), 
+      spawn('lamp', 500, 300, 10)
     ]),
     checkWin: (state) => {
+      const sw = state.components.find(c => c.type === 'switch');
       const lamp = state.components.find(c => c.type === 'lamp');
-      return !!lamp && !lamp.isBroken && Math.abs(lamp.current || 0) > 0.01;
+      return !!sw && !!lamp && sw.isOpen === true && Math.abs(lamp.current || 0) < 0.01;
     }
   },
   {
     id: 109,
-    title: "Sửa mạch 9: Lỗi ngẫu nhiên 9",
-    description: "Mạch điện đang gặp sự cố. Hãy tìm và sửa lỗi để mạch hoạt động bình thường.",
-    difficulty: 'Easy',
+    title: "Sửa mạch 9: Transistor không dẫn",
+    description: "Transistor NPN dùng để bật đèn nhưng không hoạt động. Hãy cấp một dòng điện nhỏ vào cực B (Base) thông qua một điện trở và công tắc.",
+    difficulty: 'Hard',
     category: 'repair',
     maxScore: 190,
     setup: () => createBaseState([
       spawn('battery', 200, 300, 9),
-      spawn('lamp', 500, 300, 10, undefined, true)
+      spawn('lamp', 500, 200, 10),
+      spawn('npn_transistor', 500, 400)
     ]),
     checkWin: (state) => {
       const lamp = state.components.find(c => c.type === 'lamp');
-      return !!lamp && !lamp.isBroken && Math.abs(lamp.current || 0) > 0.01;
+      const transistor = state.components.find(c => c.type === 'npn_transistor');
+      return !!lamp && !!transistor && Math.abs(lamp.current || 0) > 0.01;
     }
   },
   {
     id: 110,
-    title: "Sửa mạch 10: Lỗi ngẫu nhiên 10",
-    description: "Mạch điện đang gặp sự cố. Hãy tìm và sửa lỗi để mạch hoạt động bình thường.",
+    title: "Sửa mạch 10: Tụ điện cản dòng DC",
+    description: "Bóng đèn không sáng vì có một tụ điện mắc nối tiếp cản trở dòng điện một chiều (DC). Hãy tháo tụ điện ra hoặc mắc song song.",
     difficulty: 'Medium',
     category: 'repair',
     maxScore: 200,
     setup: () => createBaseState([
       spawn('battery', 200, 300, 9),
-      spawn('lamp', 500, 300, 10, undefined, true)
+      spawn('capacitor', 350, 300, 100),
+      spawn('lamp', 500, 300, 10)
     ]),
     checkWin: (state) => {
       const lamp = state.components.find(c => c.type === 'lamp');
-      return !!lamp && !lamp.isBroken && Math.abs(lamp.current || 0) > 0.01;
+      return !!lamp && Math.abs(lamp.current || 0) > 0.01;
     }
   },
   {
@@ -711,82 +717,90 @@ export const LEVELS: Level[] = [
   },
   {
     id: 206,
-    title: "Thêm linh kiện 6: Thử thách 6",
-    description: "Hãy thêm các linh kiện cần thiết để hoàn thiện mạch điện theo yêu cầu.",
-    difficulty: 'Easy',
+    title: "Thêm linh kiện 6: Mạch báo sáng",
+    description: "Hãy thêm một Transistor NPN và một Quang trở (LDR - dùng biến trở thay thế) để tạo mạch tự động bật đèn khi trời tối.",
+    difficulty: 'Hard',
     category: 'build',
     maxScore: 160,
     setup: () => createBaseState([
-      spawn('lamp', 400, 300, 10)
+      spawn('battery', 200, 300, 9),
+      spawn('lamp', 500, 200, 10),
+      spawn('resistor', 300, 200, 1000)
     ]),
     checkWin: (state) => {
       const lamp = state.components.find(c => c.type === 'lamp');
-      const power = state.components.find(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'solar_panel' || c.type === 'wind_turbine' || c.type === 'thermoelectric_generator');
-      return !!lamp && !!power && Math.abs(lamp.current || 0) > 0.01;
+      const transistor = state.components.find(c => c.type === 'npn_transistor');
+      const pot = state.components.find(c => c.type === 'potentiometer');
+      return !!lamp && !!transistor && !!pot && Math.abs(lamp.current || 0) > 0.01;
     }
   },
   {
     id: 207,
-    title: "Thêm linh kiện 7: Thử thách 7",
-    description: "Hãy thêm các linh kiện cần thiết để hoàn thiện mạch điện theo yêu cầu.",
-    difficulty: 'Easy',
+    title: "Thêm linh kiện 7: Chỉnh lưu nửa chu kỳ",
+    description: "Nguồn xoay chiều (AC) làm đèn nhấp nháy. Hãy thêm một Đi-ốt để tạo mạch chỉnh lưu nửa chu kỳ, chỉ cho dòng điện đi qua một chiều.",
+    difficulty: 'Medium',
     category: 'build',
     maxScore: 170,
     setup: () => createBaseState([
-      spawn('lamp', 400, 300, 10)
+      spawn('ac_source', 200, 300, 12),
+      spawn('lamp', 500, 300, 10)
     ]),
     checkWin: (state) => {
+      const diode = state.components.find(c => c.type === 'diode');
       const lamp = state.components.find(c => c.type === 'lamp');
-      const power = state.components.find(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'solar_panel' || c.type === 'wind_turbine' || c.type === 'thermoelectric_generator');
-      return !!lamp && !!power && Math.abs(lamp.current || 0) > 0.01;
+      return !!diode && !!lamp && Math.abs(lamp.current || 0) > 0.01;
     }
   },
   {
     id: 208,
-    title: "Thêm linh kiện 8: Thử thách 8",
-    description: "Hãy thêm các linh kiện cần thiết để hoàn thiện mạch điện theo yêu cầu.",
-    difficulty: 'Easy',
+    title: "Thêm linh kiện 8: Năng lượng xanh",
+    description: "Hãy sử dụng Pin mặt trời (Solar Panel) và Tuabin gió (Wind Turbine) để thắp sáng bóng đèn. Cần mắc song song để tăng dòng điện.",
+    difficulty: 'Medium',
     category: 'build',
     maxScore: 180,
     setup: () => createBaseState([
-      spawn('lamp', 400, 300, 10)
+      spawn('lamp', 500, 300, 10)
     ]),
     checkWin: (state) => {
       const lamp = state.components.find(c => c.type === 'lamp');
-      const power = state.components.find(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'solar_panel' || c.type === 'wind_turbine' || c.type === 'thermoelectric_generator');
-      return !!lamp && !!power && Math.abs(lamp.current || 0) > 0.01;
+      const solar = state.components.find(c => c.type === 'solar_panel');
+      const wind = state.components.find(c => c.type === 'wind_turbine');
+      return !!lamp && !!solar && !!wind && Math.abs(lamp.current || 0) > 0.01;
     }
   },
   {
     id: 209,
-    title: "Thêm linh kiện 9: Thử thách 9",
-    description: "Hãy thêm các linh kiện cần thiết để hoàn thiện mạch điện theo yêu cầu.",
-    difficulty: 'Easy',
+    title: "Thêm linh kiện 9: Mạch sạc dự phòng",
+    description: "Hãy dùng nguồn điện để sạc cho một Tụ điện lớn (đóng vai trò như pin dự phòng), sau đó dùng tụ điện đó thắp sáng đèn LED.",
+    difficulty: 'Hard',
     category: 'build',
     maxScore: 190,
     setup: () => createBaseState([
-      spawn('lamp', 400, 300, 10)
+      spawn('battery', 200, 300, 9),
+      spawn('switch', 300, 200), // Switch to charge
+      spawn('switch', 400, 200), // Switch to discharge
+      spawn('led', 500, 300, 10)
     ]),
     checkWin: (state) => {
-      const lamp = state.components.find(c => c.type === 'lamp');
-      const power = state.components.find(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'solar_panel' || c.type === 'wind_turbine' || c.type === 'thermoelectric_generator');
-      return !!lamp && !!power && Math.abs(lamp.current || 0) > 0.01;
+      const cap = state.components.find(c => c.type === 'capacitor');
+      const led = state.components.find(c => c.type === 'led');
+      return !!cap && !!led && Math.abs(led.current || 0) > 0.001;
     }
   },
   {
     id: 210,
-    title: "Thêm linh kiện 10: Thử thách 10",
-    description: "Hãy thêm các linh kiện cần thiết để hoàn thiện mạch điện theo yêu cầu.",
+    title: "Thêm linh kiện 10: Đèn báo động",
+    description: "Tạo một mạch báo động đơn giản: Khi công tắc đóng, Đèn LED sẽ chớp nháy (sử dụng nguồn AC tần số thấp).",
     difficulty: 'Medium',
     category: 'build',
     maxScore: 200,
     setup: () => createBaseState([
-      spawn('lamp', 400, 300, 10)
+      spawn('ac_source', 200, 300, 9),
+      spawn('switch', 300, 300)
     ]),
     checkWin: (state) => {
-      const lamp = state.components.find(c => c.type === 'lamp');
-      const power = state.components.find(c => c.type === 'battery' || c.type === 'ac_source' || c.type === 'solar_panel' || c.type === 'wind_turbine' || c.type === 'thermoelectric_generator');
-      return !!lamp && !!power && Math.abs(lamp.current || 0) > 0.01;
+      const led = state.components.find(c => c.type === 'led');
+      return !!led && Math.abs(led.current || 0) > 0.001;
     }
   },
   {

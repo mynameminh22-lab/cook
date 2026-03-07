@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useCircuitStore } from '../store';
-import { BASIC_EXAMPLES, COMPLEX_EXAMPLES, CircuitExample } from '../examples';
-import { X, FolderOpen, Zap, Cpu } from 'lucide-react';
+import { BASIC_EXAMPLES, COMPLEX_EXAMPLES, EXTREMELY_COMPLEX_EXAMPLES, CircuitExample } from '../examples';
+import { X, FolderOpen, Zap, Cpu, Network } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface CircuitExamplesModalProps {
@@ -11,7 +11,7 @@ interface CircuitExamplesModalProps {
 }
 
 export function CircuitExamplesModal({ isOpen, onClose }: CircuitExamplesModalProps) {
-  const [activeTab, setActiveTab] = useState<'basic' | 'complex'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'complex' | 'extremely_complex'>('basic');
   const { loadCircuit } = useCircuitStore(useShallow(state => ({
     loadCircuit: state.loadCircuit
   })));
@@ -23,36 +23,42 @@ export function CircuitExamplesModal({ isOpen, onClose }: CircuitExamplesModalPr
     onClose();
   };
 
-  const renderExampleCard = (example: CircuitExample, isComplex: boolean) => (
-    <button
-      key={example.name}
-      onClick={() => handleSelectExample(example)}
-      className={cn(
-        "bg-white p-5 rounded-2xl border shadow-sm transition-all text-left flex flex-col group duration-300 relative overflow-hidden",
-        "hover:shadow-md hover:border-indigo-300/60 hover:-translate-y-1 border-slate-200/60"
-      )}
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm",
-          isComplex ? "bg-purple-50 text-purple-600 border-purple-100" : "bg-blue-50 text-blue-600 border-blue-100"
-        )}>
-          {isComplex ? <Cpu size={20} /> : <Zap size={20} />}
+  const renderExampleCard = (example: CircuitExample, level: 'basic' | 'complex' | 'extremely_complex') => {
+    const isComplex = level === 'complex';
+    const isExtremelyComplex = level === 'extremely_complex';
+    
+    return (
+      <button
+        key={example.name}
+        onClick={() => handleSelectExample(example)}
+        className={cn(
+          "bg-white p-5 rounded-2xl border shadow-sm transition-all text-left flex flex-col group duration-300 relative overflow-hidden",
+          "hover:shadow-md hover:border-indigo-300/60 hover:-translate-y-1 border-slate-200/60"
+        )}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm",
+            isExtremelyComplex ? "bg-rose-50 text-rose-600 border-rose-100" :
+            isComplex ? "bg-purple-50 text-purple-600 border-purple-100" : "bg-blue-50 text-blue-600 border-blue-100"
+          )}>
+            {isExtremelyComplex ? <Network size={20} /> : isComplex ? <Cpu size={20} /> : <Zap size={20} />}
+          </div>
+          <h3 className="font-bold text-slate-800 text-base">{example.name}</h3>
         </div>
-        <h3 className="font-bold text-slate-800 text-base">{example.name}</h3>
-      </div>
-      
-      <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed font-medium mb-3">
-        {example.description}
-      </p>
+        
+        <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed font-medium mb-3">
+          {example.description}
+        </p>
 
-      <div className="mt-auto pt-3 border-t border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-        {isComplex ? 'Phức tạp' : 'Cơ bản'}
-      </div>
-    </button>
-  );
+        <div className="mt-auto pt-3 border-t border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          {isExtremelyComplex ? 'Cực phức tạp' : isComplex ? 'Phức tạp' : 'Cơ bản'}
+        </div>
+      </button>
+    );
+  };
 
-  const examples = activeTab === 'basic' ? BASIC_EXAMPLES : COMPLEX_EXAMPLES;
+  const examples = activeTab === 'basic' ? BASIC_EXAMPLES : activeTab === 'complex' ? COMPLEX_EXAMPLES : EXTREMELY_COMPLEX_EXAMPLES;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
@@ -78,7 +84,7 @@ export function CircuitExamplesModal({ isOpen, onClose }: CircuitExamplesModalPr
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6">
+        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6 overflow-x-auto custom-scrollbar">
           <button
             onClick={() => setActiveTab('basic')}
             className={cn(
@@ -101,12 +107,23 @@ export function CircuitExamplesModal({ isOpen, onClose }: CircuitExamplesModalPr
           >
             Phức tạp
           </button>
+          <button
+            onClick={() => setActiveTab('extremely_complex')}
+            className={cn(
+              "px-6 py-4 font-bold text-sm transition-all border-b-2 whitespace-nowrap",
+              activeTab === 'extremely_complex' 
+                ? "border-rose-600 text-rose-600" 
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            )}
+          >
+            Cực phức tạp
+          </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50/50 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {examples.map((ex) => renderExampleCard(ex, activeTab === 'complex'))}
+            {examples.map((ex) => renderExampleCard(ex, activeTab))}
           </div>
         </div>
 

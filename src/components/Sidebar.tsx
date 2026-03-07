@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCircuitStore } from '../store';
-import { ComponentType } from '../types';
+import { ComponentType, Component } from '../types';
+import { ComponentVisual } from './Canvas';
 import { 
   Battery, Zap, Lightbulb, Activity, ToggleLeft, Gauge, Search, Sliders, ZapOff, Sun, Type, 
   ArrowDownToLine, CircleDot, GitBranch, ChevronDown, ChevronRight,
@@ -83,6 +84,22 @@ const COMPONENT_GROUPS = [
     ]
   }
 ] as const;
+
+const getMockComponent = (type: ComponentType): Component => {
+  return {
+    id: 'mock',
+    type,
+    position: { x: 0, y: 0 },
+    rotation: 0,
+    value: type === 'resistor' ? 1000 : type === 'capacitor' ? 0.00001 : type === 'inductor' ? 0.001 : type === 'battery' ? 9 : 0,
+    isOpen: type === 'switch' || type === 'push_button' || type === 'spdt_switch',
+    isBroken: false,
+    voltageDrop: type === 'voltmeter' ? 12.5 : type === 'wattmeter' ? 12 : 0,
+    current: type === 'ammeter' ? 1.5 : type === 'wattmeter' ? 2 : 0,
+    nodes: [],
+    mode: 'voltage'
+  };
+};
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const addComponent = useCircuitStore((state) => state.addComponent);
@@ -178,8 +195,14 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     )}
                     onClick={() => handleItemClick(item.type as ComponentType)}
                   >
-                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all border border-slate-100 group-hover:border-blue-200">
-                      <item.icon className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+                    <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all border border-slate-100 group-hover:border-blue-200 overflow-hidden relative">
+                      {item.type === 'text' ? (
+                        <item.icon className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+                      ) : (
+                        <div className="scale-[0.6] origin-center flex items-center justify-center pointer-events-none">
+                          <ComponentVisual component={getMockComponent(item.type as ComponentType)} isSelected={false} />
+                        </div>
+                      )}
                     </div>
                     <span className="text-[11px] font-medium text-slate-600 group-hover:text-blue-700 leading-tight">{item.label}</span>
                   </div>
