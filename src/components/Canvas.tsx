@@ -1183,7 +1183,7 @@ export function Canvas() {
   return (
     <div 
       ref={containerRef}
-      className="flex-1 bg-slate-50 relative overflow-hidden cursor-crosshair touch-none select-none"
+      className="tour-canvas flex-1 bg-slate-50 relative overflow-hidden cursor-crosshair touch-none select-none"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onMouseDown={handleMouseDown}

@@ -16,6 +16,7 @@ import { EvaluationPanel } from './components/EvaluationPanel';
 import { ExampleInfoPanel } from './components/ExampleInfoPanel';
 import { CircuitExamplesModal } from './components/CircuitExamplesModal';
 import { EnvironmentPanel } from './components/EnvironmentPanel';
+import { Onboarding } from './components/Onboarding';
 import { useCircuitStore } from './store';
 import { AlertTriangle, Menu, X, Eye, EyeOff } from 'lucide-react';
 import { cn } from './lib/utils';
@@ -56,13 +57,16 @@ export default function App() {
       </button>
 
       {showUI && (
-        <Toolbar 
-          onToggleWiki={() => setShowWiki(true)}
-          onToggleMinigame={() => setShowMinigame(true)}
-          onToggleExamplesModal={() => setShowExamples(true)}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          onToggleInspector={() => setIsInspectorOpen(!isInspectorOpen)}
-        />
+        <>
+          <Toolbar 
+            onToggleWiki={() => setShowWiki(true)}
+            onToggleMinigame={() => setShowMinigame(true)}
+            onToggleExamplesModal={() => setShowExamples(true)}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            onToggleInspector={() => setIsInspectorOpen(!isInspectorOpen)}
+          />
+          <Onboarding />
+        </>
       )}
       
       <div className="flex flex-1 overflow-hidden relative">

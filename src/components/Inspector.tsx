@@ -23,7 +23,7 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
 
   if (!selectedComponent) {
     return (
-      <div className="w-80 bg-white border-l border-slate-200 p-6 flex flex-col gap-4 shadow-[[-4px_0_24px_rgba(0,0,0,0.02)]] z-20 h-full relative">
+      <div className="tour-inspector w-80 bg-white border-l border-slate-200 p-6 flex flex-col gap-4 shadow-[[-4px_0_24px_rgba(0,0,0,0.02)]] z-20 h-full relative">
         {/* Mobile Close Button */}
         <button 
             onClick={onClose}
@@ -76,7 +76,7 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-80 bg-white border-l border-slate-200 flex flex-col shadow-[[-4px_0_24px_rgba(0,0,0,0.02)]] z-20 h-full overflow-y-auto custom-scrollbar relative">
+    <div className="tour-inspector w-80 bg-white border-l border-slate-200 flex flex-col shadow-[[-4px_0_24px_rgba(0,0,0,0.02)]] z-20 h-full overflow-y-auto custom-scrollbar relative">
       <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
         <div>
             <h2 className="font-bold text-slate-800 text-lg mb-1">Thuộc tính</h2>

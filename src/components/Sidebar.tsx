@@ -154,7 +154,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-72 bg-white border-r border-slate-200 flex flex-col h-full select-none shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 relative">
+    <div className="tour-sidebar w-72 bg-white border-r border-slate-200 flex flex-col h-full select-none shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 relative">
       <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
         <div>
             <h2 className="font-bold text-slate-800 flex items-center gap-2 text-lg">

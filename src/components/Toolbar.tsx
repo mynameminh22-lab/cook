@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useCircuitStore } from '../store';
 import { 
   Play, Pause, RotateCcw, Trash2, Undo, Redo, 
-  Grid, CornerUpRight, Minus, Activity, FolderOpen, RefreshCw, BookOpen, Wand2, Gamepad2, CheckCircle, Menu, Settings, Save, Upload, CloudSun
+  Grid, CornerUpRight, Minus, Activity, FolderOpen, RefreshCw, BookOpen, Wand2, Gamepad2, CheckCircle, Menu, Settings, Save, Upload, CloudSun, HelpCircle
 } from 'lucide-react';
 import { BASIC_EXAMPLES, COMPLEX_EXAMPLES } from '../examples';
 import { cn } from '../lib/utils';
@@ -118,7 +118,7 @@ export function Toolbar({
         <button onClick={handleSave} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg" title="Lưu mạch"><Save size={18} /></button>
         <button onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg" title="Tải mạch"><Upload size={18} /></button>
         {onToggleExamplesModal && (
-          <button onClick={onToggleExamplesModal} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg" title="Mẫu mạch"><FolderOpen size={18} /></button>
+          <button onClick={onToggleExamplesModal} className="tour-examples p-2 text-slate-500 hover:bg-slate-100 rounded-lg" title="Mẫu mạch"><FolderOpen size={18} /></button>
         )}
       </div>
       {/* Edit Group */}
@@ -158,7 +158,7 @@ export function Toolbar({
   );
 
   return (
-    <div className="flex flex-col w-full z-[70] shrink-0 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+    <div className="tour-tools flex flex-col w-full z-[70] shrink-0 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
       {/* Main Top Bar */}
       <div className="h-14 md:h-16 border-b border-slate-200 flex items-center px-2 md:px-4 justify-between w-full">
         {/* Left: Logo & Mobile Menu */}
@@ -184,7 +184,7 @@ export function Toolbar({
           <button 
             onClick={toggleSimulation}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold transition-all active:scale-95 shadow-sm text-sm md:text-base",
+              "tour-play-pause flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold transition-all active:scale-95 shadow-sm text-sm md:text-base",
               simulationRunning 
                 ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
                 : 'bg-emerald-500 text-white border border-emerald-600/20 hover:bg-emerald-600'
@@ -207,6 +207,14 @@ export function Toolbar({
               <span className="hidden lg:inline">Wiki</span>
             </button>
           )}
+
+          <button 
+            onClick={() => useCircuitStore.getState().setHasCompletedTutorial(false)} 
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2 text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-all font-semibold text-sm"
+            title="Hướng dẫn"
+          >
+            <HelpCircle size={16} />
+          </button>
 
           <button onClick={onToggleInspector} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
             <Settings size={20} />

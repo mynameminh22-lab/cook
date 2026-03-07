@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { CircuitState, Component, ComponentType, Node, Point, EvaluationResult, LevelProgress, EnvironmentState } from './types';
 import { solveCircuit } from './engine/solver'; // Import the solver
@@ -70,6 +71,8 @@ interface CircuitStore extends CircuitState {
   laserMode: boolean;
   setLaserMode: (active: boolean) => void;
   setEnvironment: (env: Partial<EnvironmentState>) => void;
+  hasCompletedTutorial: boolean;
+  setHasCompletedTutorial: (completed: boolean) => void;
 }
 
 const INITIAL_STATE: CircuitState = {
@@ -128,7 +131,7 @@ const createInitialCircuit = (): CircuitState => {
   return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
 };
 
-export const useCircuitStore = create<CircuitStore>((set, get) => ({
+export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
   ...createInitialCircuit(),
   selectedId: null,
   selectedWireIndex: null,
@@ -148,6 +151,8 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
   laserMode: false,
   setLaserMode: (mode) => set({ laserMode: mode }),
   setEnvironment: (env) => set((state) => ({ environment: { ...state.environment, ...env } })),
+  hasCompletedTutorial: false,
+  setHasCompletedTutorial: (completed) => set({ hasCompletedTutorial: completed }),
   evaluateCircuit: () => {
     const state = get();
     const result = analyzeCircuit(state);
@@ -854,4 +859,14 @@ export const useCircuitStore = create<CircuitStore>((set, get) => ({
 
   setScale: (scale) => set({ scale }),
   setOffset: (offset) => set({ offset }),
+}), {
+  name: 'circuit-storage',
+  partialize: (state) => ({
+    hasCompletedTutorial: state.hasCompletedTutorial,
+    levelProgress: state.levelProgress,
+    environment: state.environment,
+    snapToGrid: state.snapToGrid,
+    wireMode: state.wireMode,
+    showOscilloscope: state.showOscilloscope,
+  }),
 }));
