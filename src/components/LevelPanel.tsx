@@ -18,6 +18,8 @@ export function LevelPanel() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const currentLevel = LEVELS.find(l => l.id === currentLevelId);
+  
+  const currentCost = components.reduce((sum, c) => sum + (c.price || 0), 0);
 
   useEffect(() => {
     if (!currentLevel) {
@@ -80,6 +82,28 @@ export function LevelPanel() {
           <p className="text-sm text-slate-700 leading-relaxed font-medium">
             {currentLevel.description}
           </p>
+          
+          {currentLevel.category === 'minigame' && (
+            <div className="mt-4 pt-4 border-t border-slate-200 space-y-3">
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Yêu cầu:</p>
+                <p className="text-sm text-slate-600 font-medium">{currentLevel.requirements}</p>
+              </div>
+              <div className="flex items-center justify-between bg-slate-100 p-3 rounded-xl border border-slate-200">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Ngân sách</p>
+                  <p className="text-sm font-bold text-slate-700">{(currentLevel.budget || 0).toLocaleString('vi-VN')} VND</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Chi phí hiện tại</p>
+                  <p className={cn("text-sm font-bold", currentCost <= (currentLevel.budget || 0) ? "text-emerald-600" : "text-red-600")}>
+                    {currentCost.toLocaleString('vi-VN')} VND
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {currentLevel.principle && (
             <div className="mt-4 pt-4 border-t border-slate-200">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nguyên lý:</p>

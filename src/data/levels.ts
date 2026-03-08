@@ -7,10 +7,12 @@ export interface Level {
   description: string;
   principle?: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
-  category?: 'basic' | 'repair' | 'build' | 'quiz';
+  category?: 'basic' | 'repair' | 'build' | 'quiz' | 'minigame';
   maxScore: number;
   setup: () => CircuitState;
   checkWin: (state: CircuitState) => boolean;
+  requirements?: string;
+  budget?: number;
 }
 
 function createBaseState(components: Component[]): CircuitState {
@@ -1484,6 +1486,79 @@ export const LEVELS: Level[] = [
       const xor = state.components.find(c => c.type === 'xor_gate');
       const and = state.components.find(c => c.type === 'and_gate');
       return !!xor && !!and;
+    }
+  },
+  
+  // --- MINIGAME LEVELS (Tạo mạch theo yêu cầu) ---
+  {
+    id: 401,
+    title: "Minigame 1: Thắp sáng tiết kiệm",
+    description: "Tạo một mạch điện thắp sáng bóng đèn với chi phí thấp nhất có thể.",
+    requirements: "Bóng đèn phải sáng (I > 10mA). Tổng chi phí dưới 30.000 VND.",
+    budget: 30000,
+    difficulty: 'Easy',
+    category: 'minigame',
+    maxScore: 100,
+    setup: () => createBaseState([]), // Empty canvas
+    checkWin: (state) => {
+      const lamp = state.components.find(c => c.type === 'lamp');
+      const totalCost = state.components.reduce((sum, c) => sum + (c.price || 0), 0);
+      return !!lamp && Math.abs(lamp.current || 0) > 0.01 && totalCost <= 30000;
+    }
+  },
+  {
+    id: 402,
+    title: "Minigame 2: Điều khiển đèn",
+    description: "Tạo mạch đèn có công tắc điều khiển.",
+    requirements: "Đèn sáng khi đóng công tắc, tắt khi mở. Chi phí dưới 35.000 VND.",
+    budget: 35000,
+    difficulty: 'Easy',
+    category: 'minigame',
+    maxScore: 100,
+    setup: () => createBaseState([]),
+    checkWin: (state) => {
+      const lamp = state.components.find(c => c.type === 'lamp');
+      const sw = state.components.find(c => c.type === 'switch');
+      const totalCost = state.components.reduce((sum, c) => sum + (c.price || 0), 0);
+      
+      // Check if switch controls lamp (simplified: both exist and lamp has current when switch is closed)
+      return !!lamp && !!sw && Math.abs(lamp.current || 0) > 0.01 && !sw.isOpen && totalCost <= 35000;
+    }
+  },
+  {
+    id: 403,
+    title: "Minigame 3: Mạch song song",
+    description: "Thắp sáng 2 bóng đèn mắc song song.",
+    requirements: "Cả 2 đèn đều sáng. Chi phí dưới 40.000 VND.",
+    budget: 40000,
+    difficulty: 'Medium',
+    category: 'minigame',
+    maxScore: 150,
+    setup: () => createBaseState([]),
+    checkWin: (state) => {
+      const lamps = state.components.filter(c => c.type === 'lamp');
+      const totalCost = state.components.reduce((sum, c) => sum + (c.price || 0), 0);
+      
+      if (lamps.length < 2) return false;
+      const allLit = lamps.every(l => Math.abs(l.current || 0) > 0.01);
+      
+      return allLit && totalCost <= 40000;
+    }
+  },
+  {
+    id: 404,
+    title: "Minigame 4: Bảo vệ LED",
+    description: "Thắp sáng đèn LED an toàn bằng nguồn 9V.",
+    requirements: "LED sáng nhưng không cháy (I < 20mA). Chi phí dưới 25.000 VND.",
+    budget: 25000,
+    difficulty: 'Medium',
+    category: 'minigame',
+    maxScore: 150,
+    setup: () => createBaseState([]),
+    checkWin: (state) => {
+      const led = state.components.find(c => c.type === 'led');
+      const totalCost = state.components.reduce((sum, c) => sum + (c.price || 0), 0);
+      return !!led && !led.isBroken && Math.abs(led.current || 0) > 0.001 && Math.abs(led.current || 0) < 0.02 && totalCost <= 25000;
     }
   }
 ];

@@ -11,7 +11,7 @@ interface MinigameModalProps {
 }
 
 export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
-  const [activeTab, setActiveTab] = useState<'basic' | 'repair' | 'build' | 'quiz'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'repair' | 'build' | 'quiz' | 'minigame'>('basic');
 
   const { setCurrentLevelId, loadCircuit, levelProgress } = useCircuitStore(useShallow(state => ({
     setCurrentLevelId: state.setCurrentLevelId,
@@ -171,6 +171,18 @@ export function MinigameModal({ isOpen, onClose }: MinigameModalProps) {
           >
             <HelpCircle size={18} />
             Vấn đáp
+          </button>
+          <button
+            onClick={() => setActiveTab('minigame')}
+            className={cn(
+              "flex items-center gap-2 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-2 whitespace-nowrap",
+              activeTab === 'minigame' 
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50" 
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+            )}
+          >
+            <Zap size={18} />
+            Minigame
           </button>
         </div>
 

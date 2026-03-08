@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useCircuitStore } from '../store';
 import { 
   Play, Pause, RotateCcw, Trash2, Undo, Redo, 
-  Grid, CornerUpRight, Minus, Activity, FolderOpen, RefreshCw, BookOpen, Wand2, Gamepad2, CheckCircle, Menu, Settings, Save, Upload, CloudSun, HelpCircle
+  Grid, CornerUpRight, Minus, Activity, FolderOpen, RefreshCw, BookOpen, Wand2, Gamepad2, CheckCircle, Menu, Settings, Save, Upload, CloudSun, HelpCircle, Zap
 } from 'lucide-react';
 import { BASIC_EXAMPLES, COMPLEX_EXAMPLES } from '../examples';
 import { cn } from '../lib/utils';
@@ -24,7 +24,7 @@ export function Toolbar({
   const { 
     undo, redo, past, future, 
     simulationRunning, toggleSimulation, 
-    resetCircuit, loadCircuit, autoArrange,
+    resetCircuit, loadCircuit, autoArrange, autoOptimize,
     selectedId, removeComponent, selectedWireIndex, removeWire,
     snapToGrid, setSnapToGrid,
     wireMode, setWireMode,
@@ -32,7 +32,8 @@ export function Toolbar({
     showOscilloscope,
     setShowOscilloscope,
     showEnvironment,
-    setShowEnvironment
+    setShowEnvironment,
+    currentLevelId
   } = useCircuitStore(useShallow(state => ({
     undo: state.undo,
     redo: state.redo,
@@ -43,6 +44,7 @@ export function Toolbar({
     resetCircuit: state.resetCircuit,
     loadCircuit: state.loadCircuit,
     autoArrange: state.autoArrange,
+    autoOptimize: state.autoOptimize,
     selectedId: state.selectedId,
     removeComponent: state.removeComponent,
     selectedWireIndex: state.selectedWireIndex,
@@ -55,7 +57,8 @@ export function Toolbar({
     showOscilloscope: state.showOscilloscope,
     setShowOscilloscope: state.setShowOscilloscope,
     showEnvironment: state.showEnvironment,
-    setShowEnvironment: state.setShowEnvironment
+    setShowEnvironment: state.setShowEnvironment,
+    currentLevelId: state.currentLevelId
   })));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -139,7 +142,22 @@ export function Toolbar({
         </div>
 
         <button onClick={resetCircuit} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg" title="Xóa toàn bộ"><RefreshCw size={18} /></button>
-        <button onClick={autoArrange} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg" title="Tự động xếp mạch"><Wand2 size={18} /></button>
+        <button 
+          onClick={autoArrange} 
+          disabled={currentLevelId !== null}
+          className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg disabled:opacity-30 disabled:hover:bg-transparent" 
+          title={currentLevelId !== null ? "Không khả dụng trong chế độ giải đố" : "Tự động xếp mạch"}
+        >
+          <Wand2 size={18} />
+        </button>
+        <button 
+          onClick={autoOptimize} 
+          disabled={currentLevelId !== null}
+          className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg disabled:opacity-30 disabled:hover:bg-transparent" 
+          title={currentLevelId !== null ? "Không khả dụng trong chế độ giải đố" : "Tự động tối ưu linh kiện"}
+        >
+          <Zap size={18} />
+        </button>
       </div>
 
       {/* Sim Group */}

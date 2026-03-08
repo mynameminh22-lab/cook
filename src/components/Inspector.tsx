@@ -75,6 +75,21 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
     if (!isNaN(val)) updateComponent(selectedComponent.id, { maxVoltage: val });
   };
 
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val)) updateComponent(selectedComponent.id, { price: val });
+  };
+
+  const handleCapacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val)) updateComponent(selectedComponent.id, { capacity: val, charge: val }); // Reset charge when capacity changes
+  };
+
+  const handleInternalResistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val)) updateComponent(selectedComponent.id, { internalResistance: val });
+  };
+
   return (
     <div className="tour-inspector w-80 bg-white border-l border-slate-200 flex flex-col shadow-[[-4px_0_24px_rgba(0,0,0,0.02)]] z-20 h-full overflow-y-auto custom-scrollbar relative">
       <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
@@ -267,6 +282,61 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
               className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
             />
           </div>
+        )}
+
+        {/* Battery Capacity & Resistance */}
+        {selectedComponent.type === 'battery' && (
+          <>
+            <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+              <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                Dung lượng (mAh)
+              </label>
+              <input
+                type="number"
+                value={selectedComponent.capacity || 500}
+                onChange={handleCapacityChange}
+                step="100"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
+              />
+            </div>
+            <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+              <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                Nội trở (Ω)
+              </label>
+              <input
+                type="number"
+                value={selectedComponent.internalResistance || 0}
+                onChange={handleInternalResistanceChange}
+                step="0.1"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 font-medium shadow-sm"
+              />
+            </div>
+            <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-center mb-2">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Dung lượng pin
+                    </label>
+                    <span className="text-xs font-bold text-slate-700">
+                        {Math.round((selectedComponent.charge || 0) / (selectedComponent.capacity || 1) * 100)}%
+                    </span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div 
+                        className={cn("h-2.5 rounded-full transition-all duration-500", 
+                            ((selectedComponent.charge || 0) / (selectedComponent.capacity || 1)) > 0.5 ? "bg-green-500" : 
+                            ((selectedComponent.charge || 0) / (selectedComponent.capacity || 1)) > 0.2 ? "bg-yellow-500" : "bg-red-500"
+                        )} 
+                        style={{ width: `${Math.min(100, Math.max(0, (selectedComponent.charge || 0) / (selectedComponent.capacity || 1) * 100))}%` }}
+                    ></div>
+                </div>
+                <button 
+                    onClick={() => updateComponent(selectedComponent.id, { charge: selectedComponent.capacity })}
+                    className="mt-3 w-full px-3 py-2 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg hover:bg-blue-100 transition-all shadow-sm font-bold text-xs"
+                >
+                    Nạp đầy pin
+                </button>
+            </div>
+          </>
         )}
 
         {/* Breakable Component Status */}

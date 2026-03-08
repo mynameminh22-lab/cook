@@ -79,6 +79,43 @@ export function Oscilloscope() {
     setPaused(false);
   }, [selectedId]);
 
+  // Frequency Calculation
+  let frequency = 0;
+  if (data.length > 2) {
+      let sumV = 0;
+      let minV = data[0].voltage;
+      let maxV = data[0].voltage;
+      for (const p of data) {
+          sumV += p.voltage;
+          if (p.voltage < minV) minV = p.voltage;
+          if (p.voltage > maxV) maxV = p.voltage;
+      }
+      const meanV = sumV / data.length;
+      
+      if (maxV - minV > 0.1) {
+          let crossings = [];
+          for (let i = 1; i < data.length; i++) {
+              const p1 = data[i - 1];
+              const p2 = data[i];
+              if (p1.voltage <= meanV && p2.voltage > meanV) {
+                  const t = p1.time + (meanV - p1.voltage) / (p2.voltage - p1.voltage) * (p2.time - p1.time);
+                  crossings.push(t);
+              }
+          }
+          
+          if (crossings.length >= 2) {
+              let totalPeriod = 0;
+              for (let i = 1; i < crossings.length; i++) {
+                  totalPeriod += crossings[i] - crossings[i - 1];
+              }
+              const avgPeriod = totalPeriod / (crossings.length - 1);
+              if (avgPeriod > 0) {
+                  frequency = 1 / avgPeriod;
+              }
+          }
+      }
+  }
+
   // Rendering
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -469,6 +506,12 @@ export function Oscilloscope() {
                        </span>
                    </div>
                  )}
+                 <div className="flex items-center gap-2 bg-slate-900/60 px-2 py-1 rounded backdrop-blur-sm border border-purple-500/30">
+                     <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+                     <span className="text-xs text-purple-400 font-mono font-bold">
+                         {frequency > 0 ? `${frequency.toFixed(1)} Hz` : 'DC'}
+                     </span>
+                 </div>
              </div>
              <div className="absolute bottom-1 right-2 text-[10px] text-slate-600 font-mono">
                  {selectedComponent.type} ({selectedComponent.id.slice(0,4)})

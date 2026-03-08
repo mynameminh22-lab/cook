@@ -449,6 +449,32 @@ export const ComponentVisual = React.memo(({ component, isSelected, onToggle }: 
           )}
         </svg>
       )}
+      {type === 'motor' && (
+        <svg width="64" height="64" viewBox="0 0 64 64" className="w-full h-full drop-shadow-md">
+          <line x1="0" y1="32" x2="16" y2="32" stroke="#1e293b" strokeWidth="2" />
+          <line x1="48" y1="32" x2="64" y2="32" stroke="#1e293b" strokeWidth="2" />
+          
+          {/* Motor Body */}
+          <circle cx="32" cy="32" r="16" fill="#f1f5f9" stroke="#334155" strokeWidth="2" />
+          
+          {/* M label */}
+          <text x="32" y="36" fontSize="16" fill="#1e293b" textAnchor="middle" fontWeight="bold" fontFamily="sans-serif">M</text>
+          
+          {/* Rotating Shaft/Indicator */}
+          {Math.abs(component.current) > 0.01 && (
+             <g className="origin-[32px_32px] animate-[spin_1s_linear_infinite]" style={{ animationDuration: `${Math.max(0.1, 1 / Math.abs(component.current))}s` }}>
+                <path d="M 32 16 L 32 12" stroke="#ef4444" strokeWidth="2" />
+                <path d="M 32 48 L 32 52" stroke="#ef4444" strokeWidth="2" />
+                <path d="M 16 32 L 12 32" stroke="#ef4444" strokeWidth="2" />
+                <path d="M 48 32 L 52 32" stroke="#ef4444" strokeWidth="2" />
+             </g>
+          )}
+          
+          {/* Terminals */}
+          <circle cx="16" cy="32" r="2" fill="#1e293b" />
+          <circle cx="48" cy="32" r="2" fill="#1e293b" />
+        </svg>
+      )}
       {type === 'text' && (
         <div className="whitespace-nowrap font-sans text-slate-800 font-medium select-none pointer-events-none">
            {component.text || 'Text'}
@@ -951,7 +977,7 @@ export function Canvas() {
     e.dataTransfer.dropEffect = 'copy';
   };
 
-  const startDrag = (e: React.MouseEvent | React.TouchEvent, id: string, pos: { x: number, y: number }, clientPos?: { x: number, y: number }) => {
+  const startDrag = (e: React.MouseEvent | React.TouchEvent | React.PointerEvent, id: string, pos: { x: number, y: number }, clientPos?: { x: number, y: number }) => {
     isInteractingWithComponent.current = true;
     // e.preventDefault(); // Don't prevent default here, it might block scrolling/other gestures if not careful. 
     // But for drag, we usually want to prevent default.
@@ -1001,14 +1027,8 @@ export function Canvas() {
       moveComponent(draggingId, { x: newX, y: newY });
     };
 
-    const handleWindowMouseMove = (e: MouseEvent) => {
+    const handleWindowPointerMove = (e: PointerEvent) => {
       handleMove(e.clientX, e.clientY);
-    };
-    
-    const handleWindowTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // Prevent scrolling while dragging component
-      const touch = e.touches[0];
-      handleMove(touch.clientX, touch.clientY);
     };
 
     const handleWindowUp = () => {
@@ -1019,61 +1039,62 @@ export function Canvas() {
       }, 100);
     };
 
-    window.addEventListener('mousemove', handleWindowMouseMove);
-    window.addEventListener('mouseup', handleWindowUp);
-    window.addEventListener('touchmove', handleWindowTouchMove, { passive: false });
-    window.addEventListener('touchend', handleWindowUp);
+    window.addEventListener('pointermove', handleWindowPointerMove);
+    window.addEventListener('pointerup', handleWindowUp);
+    window.addEventListener('pointercancel', handleWindowUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleWindowMouseMove);
-      window.removeEventListener('mouseup', handleWindowUp);
-      window.removeEventListener('touchmove', handleWindowTouchMove);
-      window.removeEventListener('touchend', handleWindowUp);
+      window.removeEventListener('pointermove', handleWindowPointerMove);
+      window.removeEventListener('pointerup', handleWindowUp);
+      window.removeEventListener('pointercancel', handleWindowUp);
     };
   }, [draggingId, dragOffset, moveComponent, gridSize, scale, offset]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Only pan if we are clicking directly on the canvas container (background)
-    if (e.target !== containerRef.current) return;
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Prevent panning if interacting with a component
+    if (isInteractingWithComponent.current) return;
 
-    // Pan on Right Click (button 2) OR Left Click (button 0)
-    if (e.button === 2 || e.button === 0) {
-      e.preventDefault();
+    // Pan on Left Click (0) or Right Click (2) or Touch (0)
+    if (e.button === 0 || e.button === 2) {
       setHasPanned(false);
       setPanStart({ x: e.clientX, y: e.clientY });
+      setIsPanning(true);
+      
+      // Capture pointer so we keep getting events even if pointer leaves canvas
+      if (e.target instanceof HTMLElement) {
+        e.target.setPointerCapture(e.pointerId);
+      }
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    // If we are holding a button and it's on the background, we might be panning
-    if ((e.buttons === 1 || e.buttons === 2) && e.target === containerRef.current) {
-        const dx = e.clientX - panStart.x;
-        const dy = e.clientY - panStart.y;
-        
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-            setIsPanning(true);
-            setHasPanned(true);
-        }
-        
-        if (isPanning) {
-            setOffset({ x: offset.x + dx, y: offset.y + dy });
-            setPanStart({ x: e.clientX, y: e.clientY });
-        }
-        return;
-    }
-
+  const handlePointerMove = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left - offset.x) / scale;
     const y = (e.clientY - rect.top - offset.y) / scale;
     setMousePos({ x, y });
+
+    if (isPanning && !wiringStartNode) {
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+          setHasPanned(true);
+      }
+      
+      setOffset({ x: offset.x + dx, y: offset.y + dy });
+      setPanStart({ x: e.clientX, y: e.clientY });
+    }
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
     setIsPanning(false);
+    if (e.target instanceof HTMLElement && e.target.hasPointerCapture(e.pointerId)) {
+      e.target.releasePointerCapture(e.pointerId);
+    }
   };
 
-  // Touch Handlers for Canvas (Pan & Zoom)
+  // Touch Handlers for Canvas (Pinch Zoom Only)
   const getTouchDistance = (t1: React.Touch, t2: React.Touch) => {
     const dx = t1.clientX - t2.clientX;
     const dy = t1.clientY - t2.clientY;
@@ -1083,28 +1104,19 @@ export function Canvas() {
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       // Pinch Start
+      setIsPanning(false); // Cancel pan if pinching
       const d = getTouchDistance(e.touches[0], e.touches[1]);
       setLastTouchDistance(d);
-    } else if (e.touches.length === 1) {
-      // Pan Start (if not dragging component)
-      if (!draggingId) {
-        const touch = e.touches[0];
-        setPanStart({ x: touch.clientX, y: touch.clientY });
-        setIsPanning(true);
-      }
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (draggingId) return; // Handled by global listener
-
     if (e.touches.length === 2) {
       // Pinch Zoom
-      e.preventDefault(); // Prevent browser zoom
       const d = getTouchDistance(e.touches[0], e.touches[1]);
       if (lastTouchDistance && containerRef.current) {
         const delta = d - lastTouchDistance;
-        const zoomSensitivity = 0.005;
+        const zoomSensitivity = 0.015; // Increased sensitivity for mobile
         const newScale = Math.min(Math.max(scale + delta * zoomSensitivity, 0.1), 5);
         
         // Zoom towards center of pinch
@@ -1125,20 +1137,13 @@ export function Canvas() {
         setOffset({ x: newOffsetX, y: newOffsetY });
         setLastTouchDistance(d);
       }
-    } else if (e.touches.length === 1 && isPanning) {
-      // Pan
-      e.preventDefault(); // Prevent browser scroll
-      const touch = e.touches[0];
-      const dx = touch.clientX - panStart.x;
-      const dy = touch.clientY - panStart.y;
-      setOffset({ x: offset.x + dx, y: offset.y + dy });
-      setPanStart({ x: touch.clientX, y: touch.clientY });
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsPanning(false);
-    setLastTouchDistance(null);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      setLastTouchDistance(null);
+    }
   };
 
   const handleNodePointerDown = (e: React.PointerEvent, nodeId: string) => {
@@ -1186,14 +1191,16 @@ export function Canvas() {
       className="tour-canvas flex-1 bg-slate-50 relative overflow-hidden cursor-crosshair touch-none select-none"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       onContextMenu={(e) => {
         e.preventDefault();
       }}
@@ -1357,26 +1364,21 @@ export function Canvas() {
             top: comp.position.y,
             transform: 'translate(-50%, -50%)' // Center anchor
           }}
-          onMouseDown={(e) => {
+          onPointerDown={(e) => {
+            e.stopPropagation(); // Prevent canvas from panning
             if (comp.type === 'push_button' && !e.ctrlKey && !e.metaKey) {
-              e.stopPropagation();
               // Momentary switch logic: Press = Close (isOpen: false)
               useCircuitStore.getState().updateComponent(comp.id, { isOpen: false });
               
-              const handleMouseUp = () => {
+              const handlePointerUp = () => {
                 // Release = Open (isOpen: true)
                 useCircuitStore.getState().updateComponent(comp.id, { isOpen: true });
-                window.removeEventListener('mouseup', handleMouseUp);
+                window.removeEventListener('pointerup', handlePointerUp);
               };
-              window.addEventListener('mouseup', handleMouseUp);
+              window.addEventListener('pointerup', handlePointerUp);
             } else {
-              startDrag(e, comp.id, comp.position);
+              startDrag(e, comp.id, comp.position, { x: e.clientX, y: e.clientY });
             }
-          }}
-          onTouchStart={(e) => {
-             // Prevent panning when dragging component
-             const touch = e.touches[0];
-             startDrag(e, comp.id, comp.position, { x: touch.clientX, y: touch.clientY });
           }}
           onClick={(e) => {
             e.stopPropagation();

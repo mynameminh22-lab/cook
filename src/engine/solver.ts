@@ -69,7 +69,7 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
 
   // Components Conductance
   components.forEach(comp => {
-    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'multimeter', 'wattmeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode', 'npn_transistor', 'pnp_transistor', 'seven_segment'].includes(comp.type)) {
+    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'multimeter', 'wattmeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode', 'npn_transistor', 'pnp_transistor', 'seven_segment', 'motor'].includes(comp.type)) {
       let resistance = comp.value;
       let g = 0;
       let i_src = 0;
@@ -393,10 +393,10 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
     let current = 0;
     let isBroken = comp.isBroken;
 
-    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'multimeter', 'wattmeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode'].includes(comp.type)) {
+    if (['resistor', 'lamp', 'voltmeter', 'ammeter', 'multimeter', 'wattmeter', 'switch', 'push_button', 'potentiometer', 'fuse', 'led', 'spdt_switch', 'capacitor', 'inductor', 'diode', 'motor'].includes(comp.type)) {
       let resistance = comp.value;
       
-      if (['resistor', 'lamp', 'potentiometer'].includes(comp.type)) {
+      if (['resistor', 'lamp', 'potentiometer', 'motor'].includes(comp.type)) {
         resistance = Math.max(resistance, 0.1);
         if (comp.type === 'resistor') {
           const alpha = 0.002;
@@ -533,6 +533,7 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
       else if (comp.type === 'fuse') thermalRes = 100;
       else if (comp.type === 'battery') thermalRes = 5;
       else if (comp.type === 'npn_transistor' || comp.type === 'pnp_transistor') thermalRes = 60;
+      else if (comp.type === 'motor') thermalRes = 20;
       
       temp = ambientTemp + power * thermalRes;
 
@@ -569,6 +570,10 @@ export function solveCircuit(state: CircuitState, dt: number = 0, time: number =
           // Generator Overcurrent
           else if (['solar_panel', 'wind_turbine', 'thermoelectric_generator'].includes(comp.type)) {
               if (Math.abs(current) > (comp.maxCurrent || 5)) isBroken = true;
+          }
+          // Motor Burnout
+          else if (comp.type === 'motor') {
+              if (Math.abs(vDrop) > (comp.maxVoltage || 12)) isBroken = true;
           }
           
           // Thermal Runaway / Overheat

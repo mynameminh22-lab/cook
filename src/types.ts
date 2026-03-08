@@ -1,4 +1,4 @@
-export type ComponentType = 'resistor' | 'battery' | 'lamp' | 'wire' | 'ground' | 'switch' | 'push_button' | 'spdt_switch' | 'voltmeter' | 'ammeter' | 'multimeter' | 'wattmeter' | 'potentiometer' | 'fuse' | 'led' | 'text' | 'capacitor' | 'inductor' | 'diode' | 'ac_source' | 'npn_transistor' | 'pnp_transistor' | 'opamp' | 'and_gate' | 'or_gate' | 'not_gate' | 'nand_gate' | 'nor_gate' | 'xor_gate' | 'seven_segment' | 'clock' | 'solar_panel' | 'wind_turbine' | 'thermoelectric_generator';
+export type ComponentType = 'resistor' | 'battery' | 'lamp' | 'wire' | 'ground' | 'switch' | 'push_button' | 'spdt_switch' | 'voltmeter' | 'ammeter' | 'multimeter' | 'wattmeter' | 'potentiometer' | 'fuse' | 'led' | 'text' | 'capacitor' | 'inductor' | 'diode' | 'ac_source' | 'npn_transistor' | 'pnp_transistor' | 'opamp' | 'and_gate' | 'or_gate' | 'not_gate' | 'nand_gate' | 'nor_gate' | 'xor_gate' | 'seven_segment' | 'clock' | 'solar_panel' | 'wind_turbine' | 'thermoelectric_generator' | 'motor';
 
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'stormy';
 
@@ -42,6 +42,11 @@ export interface Component {
   maxPower?: number; // Maximum power dissipation (W)
   maxVoltage?: number; // Maximum voltage rating (V)
   maxCurrent?: number; // Maximum current rating (A)
+  price?: number; // Cost in VND
+  charge?: number; // Current charge in mAh
+  capacity?: number; // Max capacity in mAh
+  internalResistance?: number; // Internal resistance in Ohms
+  isRechargeable?: boolean; // Can be recharged
 }
 
 export interface EvaluationResult {
@@ -51,6 +56,7 @@ export interface EvaluationResult {
   performanceIssues: string[];
   efficiency: number; // Percentage or value
   totalPower: number;
+  totalCost: number; // Total cost in VND
 }
 
 export interface LevelProgress {
@@ -79,4 +85,5 @@ export interface CircuitState {
   levelProgress: Record<number, LevelProgress>; // Level ID -> Progress
   currentExample: CircuitExampleInfo | null;
   environment: EnvironmentState;
+  isMinigameMode?: boolean;
 }

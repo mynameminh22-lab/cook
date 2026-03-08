@@ -12,7 +12,7 @@ export function EvaluationPanel() {
 
   if (!evaluationResult) return null;
 
-  const { score, safetyIssues, connectionIssues, performanceIssues, efficiency, totalPower } = evaluationResult;
+  const { score, safetyIssues, connectionIssues, performanceIssues, efficiency, totalPower, totalCost } = evaluationResult;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -80,7 +80,7 @@ export function EvaluationPanel() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center text-center">
               <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Tổng công suất</span>
               <span className="text-xl font-bold text-slate-800">{totalPower.toFixed(2)} W</span>
@@ -88,6 +88,10 @@ export function EvaluationPanel() {
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center text-center">
               <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Hiệu suất</span>
               <span className="text-xl font-bold text-slate-800">{efficiency.toFixed(1)}%</span>
+            </div>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center text-center">
+              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Tổng chi phí</span>
+              <span className="text-xl font-bold text-slate-800">{totalCost?.toLocaleString('vi-VN') || 0} đ</span>
             </div>
           </div>
 

@@ -50,6 +50,7 @@ interface CircuitStore extends CircuitState {
   resetCircuit: () => void;
   loadCircuit: (state: CircuitState) => void;
   autoArrange: () => void;
+  autoOptimize: () => void;
   currentLevelId: number | null;
   setCurrentLevelId: (id: number | null) => void;
   completeLevel: (id: number, score: number, stars: number) => void;
@@ -333,6 +334,26 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
       rating: type === 'fuse' ? 0.5 : undefined, // 0.5A fuse
       color: type === 'led' ? '#ff0000' : undefined, // Red LED
       isOpen: type === 'switch' || type === 'push_button' || type === 'spdt_switch' ? true : undefined, // Default open (off)
+      
+      // New Properties
+      price: type === 'resistor' ? 1000 :
+             type === 'battery' ? 20000 :
+             type === 'lamp' ? 5000 :
+             type === 'led' ? 2000 :
+             type === 'switch' ? 3000 :
+             type === 'wire' ? 500 :
+             type === 'fuse' ? 2000 :
+             type === 'capacitor' ? 1500 :
+             type === 'inductor' ? 2000 :
+             (type === 'npn_transistor' || type === 'pnp_transistor') ? 3000 :
+             type === 'ac_source' ? 150000 :
+             1000,
+      
+      // Battery Specific
+      charge: type === 'battery' ? 500 : undefined, // 500 mAh
+      capacity: type === 'battery' ? 500 : undefined,
+      maxVoltage: type === 'battery' ? 9 : undefined, // Nominal voltage
+      isRechargeable: type === 'battery' ? false : undefined,
     };
 
     if (type === 'text') {
@@ -683,7 +704,56 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
       }
 
       const newTime = state.time + dt;
-      const solved = solveCircuit({ ...state, environment: newEnv }, dt, newTime);
+
+      // Update Battery Charge
+      const newComponents = state.components.map(c => {
+        if (c.type === 'battery' && c.charge !== undefined && c.capacity !== undefined) {
+          // Calculate discharge/charge
+          // dt is in seconds. Current is in Amps.
+          // Charge is in mAh.
+          // 1 Ah = 3600 Coulombs.
+          // dQ (mAh) = I (A) * dt (s) * (1000 / 3600)
+          
+          const current = c.current || 0;
+          // Assuming current > 0 means discharging for a source.
+          // If we want charging, we need to know if current is flowing INTO the positive terminal.
+          // The solver usually returns current magnitude or direction relative to nodes.
+          // For simplicity, let's assume any current drains the battery unless it's explicitly a rechargeable battery connected to a higher voltage source.
+          // But wait, if we have two batteries in parallel, they might circulate current.
+          // Let's stick to simple depletion for now: any current drains it.
+          // Realism: If V_terminal > V_emf, it charges. But we don't have V_terminal easily here without checking nodes.
+          
+          const dischargeAmount = (Math.abs(current) * dt * 1000) / 3600;
+          let newCharge = c.charge - dischargeAmount;
+          
+          if (newCharge < 0) newCharge = 0;
+          
+          // Update voltage based on charge
+          // If empty, voltage is 0.
+          // If not empty, voltage is nominal (maxVoltage).
+          // We could add a discharge curve here.
+          let newValue = c.value;
+          const nominalVoltage = c.maxVoltage || 9; // Default to 9V if not set
+          
+          if (newCharge <= 0) {
+            newValue = 0;
+          } else {
+            // Simple linear drop for last 10%? Or just constant?
+            // Let's keep it constant until 0 for simplicity, or maybe drop slightly.
+            // Let's do: V = V_nom * (0.8 + 0.2 * (charge/capacity)) to simulate some drop?
+            // No, user wants "completely realistic". Real batteries drop voltage.
+            // Li-ion: 4.2 -> 3.0. Alkaline: 1.5 -> 0.9.
+            // Let's use a simple linear model from 100% to 0% charge mapping to 100% to 80% voltage, then drop to 0.
+            // Actually, if it hits 0 charge, it's 0V.
+            newValue = nominalVoltage; 
+          }
+          
+          return { ...c, charge: newCharge, value: newValue };
+        }
+        return c;
+      });
+
+      const solved = solveCircuit({ ...state, components: newComponents, environment: newEnv }, dt, newTime);
       return {
         ...state,
         time: newTime,
@@ -702,9 +772,33 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
 
   loadCircuit: (circuitState) => {
     get().saveCheckpoint();
+    
+    // Migrate components to include new properties if missing
+    const migratedComponents = circuitState.components.map(c => ({
+      ...c,
+      price: c.price ?? (
+             c.type === 'resistor' ? 1000 :
+             c.type === 'battery' ? 20000 :
+             c.type === 'lamp' ? 5000 :
+             c.type === 'led' ? 2000 :
+             c.type === 'switch' ? 3000 :
+             c.type === 'wire' ? 500 :
+             c.type === 'fuse' ? 2000 :
+             c.type === 'capacitor' ? 1500 :
+             c.type === 'inductor' ? 2000 :
+             (c.type === 'npn_transistor' || c.type === 'pnp_transistor') ? 3000 :
+             c.type === 'ac_source' ? 150000 :
+             1000),
+      charge: c.charge ?? (c.type === 'battery' ? 500 : undefined),
+      capacity: c.capacity ?? (c.type === 'battery' ? 500 : undefined),
+      maxVoltage: c.maxVoltage ?? (c.type === 'battery' ? 9 : undefined),
+      isRechargeable: c.isRechargeable ?? (c.type === 'battery' ? false : undefined),
+    }));
+
     set((state) => ({
       ...state,
       ...circuitState,
+      components: migratedComponents,
       selectedId: null,
       // Ensure simulation keeps running or stops based on preference, 
       // but usually we want to keep the loaded state's simulation setting or default to true
@@ -714,23 +808,27 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
   },
 
   autoArrange: () => {
+    if (get().currentLevelId !== null) return;
     get().saveCheckpoint();
     set((state) => {
       const components = state.components.map(c => ({ ...c }));
       const nodes = state.nodes.map(n => ({ ...n }));
       
       // Force Directed Layout Parameters
-      const iterations = 100;
+      const iterations = 150; // Increased iterations
       const center = { x: 400, y: 300 };
-      const repulsion = 500000;
-      const attraction = 0.05;
-      const damping = 0.9;
+      const repulsion = 600000; // Increased repulsion
+      const attraction = 0.08; // Increased attraction
+      const damping = 0.85;
       
       // Map component ID to velocity
       const velocities: Record<string, { x: number, y: number }> = {};
       components.forEach(c => velocities[c.id] = { x: 0, y: 0 });
 
       for (let iter = 0; iter < iterations; iter++) {
+        // Temperature cooling
+        const temp = 1 - (iter / iterations);
+
         // 1. Repulsion (Component-Component)
         for (let i = 0; i < components.length; i++) {
             for (let j = i + 1; j < components.length; j++) {
@@ -741,7 +839,7 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
                 const distSq = dx*dx + dy*dy;
                 const dist = Math.sqrt(distSq) || 0.1;
                 
-                const force = repulsion / distSq;
+                const force = (repulsion / distSq) * temp;
                 const fx = (dx / dist) * force;
                 const fy = (dy / dist) * force;
                 
@@ -769,7 +867,7 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
                         const dy = c1.position.y - c2.position.y;
                         const dist = Math.sqrt(dx*dx + dy*dy);
                         
-                        const force = dist * attraction;
+                        const force = dist * attraction * temp;
                         const fx = (dx / dist) * force;
                         const fy = (dy / dist) * force;
                         
@@ -786,14 +884,14 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
         components.forEach(c => {
             const dx = c.position.x - center.x;
             const dy = c.position.y - center.y;
-            velocities[c.id].x -= dx * 0.01;
-            velocities[c.id].y -= dy * 0.01;
+            velocities[c.id].x -= dx * 0.02 * temp;
+            velocities[c.id].y -= dy * 0.02 * temp;
         });
 
         // 4. Update Positions
         components.forEach(c => {
             const v = velocities[c.id];
-            const maxV = 50;
+            const maxV = 50 * temp;
             const vMag = Math.sqrt(v.x*v.x + v.y*v.y);
             if (vMag > maxV) {
                 v.x = (v.x / vMag) * maxV;
@@ -854,6 +952,49 @@ export const useCircuitStore = create<CircuitStore>()(persist((set, get) => ({
       const newState = { ...state, components, nodes };
       const solved = solveCircuit(newState);
       return { ...newState, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    });
+  },
+
+  autoOptimize: () => {
+    if (get().currentLevelId !== null) return;
+    get().saveCheckpoint();
+    set((state) => {
+        const E12 = [1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2];
+        const getNearestE12 = (val: number) => {
+            if (val <= 0) return val;
+            const exponent = Math.floor(Math.log10(val));
+            const mantissa = val / Math.pow(10, exponent);
+            let best = E12[0];
+            let minDiff = Math.abs(mantissa - best);
+            for (const e of E12) {
+                const diff = Math.abs(mantissa - e);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    best = e;
+                }
+            }
+            return best * Math.pow(10, exponent);
+        };
+
+        const STD_VOLTAGES = [1.5, 3, 3.3, 5, 6, 9, 12, 24, 48, 110, 220];
+        const getNearestVoltage = (val: number) => {
+            if (val <= 0) return val;
+            return STD_VOLTAGES.reduce((prev, curr) => Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
+        };
+
+        const newComponents = state.components.map(c => {
+            let newValue = c.value;
+            if (['resistor', 'capacitor', 'inductor', 'potentiometer'].includes(c.type)) {
+                newValue = getNearestE12(c.value);
+            } else if (['battery', 'ac_source', 'solar_panel', 'wind_turbine'].includes(c.type)) {
+                newValue = getNearestVoltage(c.value);
+            }
+            return { ...c, value: newValue };
+        });
+
+        const newState = { ...state, components: newComponents };
+        const solved = solveCircuit(newState);
+        return { ...newState, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     });
   },
 

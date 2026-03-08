@@ -7,6 +7,12 @@ export function analyzeCircuit(state: CircuitState): EvaluationResult {
   const connectionIssues: string[] = [];
   const performanceIssues: string[] = [];
   let totalPower = 0;
+  let totalCost = 0;
+
+  // Calculate total cost
+  components.forEach(comp => {
+    totalCost += comp.price || 0;
+  });
 
   // 1. Safety Check
   if (shortCircuitWarning) {
@@ -17,6 +23,16 @@ export function analyzeCircuit(state: CircuitState): EvaluationResult {
   components.forEach(comp => {
     const power = Math.abs((comp.voltageDrop || 0) * (comp.current || 0));
     totalPower += power;
+
+    // Check Battery Health
+    if (comp.type === 'battery' && comp.charge !== undefined && comp.capacity !== undefined) {
+      if (comp.charge <= 0) {
+        score -= 5;
+        performanceIssues.push(`Pin (${comp.id.slice(0, 4)}) đã hết điện.`);
+      } else if (comp.charge < comp.capacity * 0.2) {
+        performanceIssues.push(`Pin (${comp.id.slice(0, 4)}) sắp hết điện (${Math.round(comp.charge / comp.capacity * 100)}%).`);
+      }
+    }
 
     // Check Overpower
     const maxPower = comp.maxPower || (comp.type === 'resistor' || comp.type === 'potentiometer' ? 0.5 : Infinity);
@@ -119,6 +135,7 @@ export function analyzeCircuit(state: CircuitState): EvaluationResult {
     connectionIssues,
     performanceIssues,
     efficiency,
-    totalPower
+    totalPower,
+    totalCost
   };
 }

@@ -390,6 +390,176 @@ export const BASIC_EXAMPLES: CircuitExample[] = [
       return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
     }
   },
+  {
+    name: 'Mạch điện nhà ở (Mô phỏng)',
+    description: 'Mô phỏng hệ thống điện cơ bản trong gia đình với nguồn AC 220V, cầu chì bảo vệ và các thiết bị tiêu thụ.',
+    principle: 'Điện lưới 220V được cấp qua cầu chì tổng. Các thiết bị (đèn, quạt) được mắc song song để hoạt động độc lập ở cùng điện áp.',
+    application: 'Hệ thống điện dân dụng.',
+    create: () => {
+      const acId = uuidv4();
+      const fuseId = uuidv4();
+      const sw1Id = uuidv4(); // Living Room Light Switch
+      const lamp1Id = uuidv4(); // Living Room Light
+      const sw2Id = uuidv4(); // Kitchen Light Switch
+      const lamp2Id = uuidv4(); // Kitchen Light
+      const sw3Id = uuidv4(); // Fan Switch
+      const fanId = uuidv4(); // Fan (Motor)
+      
+      const acPos = { x: 100, y: 300 };
+      const fusePos = { x: 200, y: 200 };
+      const sw1Pos = { x: 350, y: 150 };
+      const lamp1Pos = { x: 500, y: 150 };
+      const sw2Pos = { x: 350, y: 300 };
+      const lamp2Pos = { x: 500, y: 300 };
+      const sw3Pos = { x: 350, y: 450 };
+      const fanPos = { x: 500, y: 450 };
+
+      const n1 = uuidv4(); const n2 = uuidv4(); // AC
+      const n3 = uuidv4(); const n4 = uuidv4(); // Fuse
+      const n5 = uuidv4(); const n6 = uuidv4(); // SW1
+      const n7 = uuidv4(); const n8 = uuidv4(); // Lamp1
+      const n9 = uuidv4(); const n10 = uuidv4(); // SW2
+      const n11 = uuidv4(); const n12 = uuidv4(); // Lamp2
+      const n13 = uuidv4(); const n14 = uuidv4(); // SW3
+      const n15 = uuidv4(); const n16 = uuidv4(); // Fan
+
+      const components: Component[] = [
+        { id: acId, type: 'ac_source', position: acPos, rotation: 0, value: 220, nodes: [n1, n2], current: 0, voltageDrop: 0, price: 150000 },
+        { id: fuseId, type: 'fuse', position: fusePos, rotation: 0, value: 0.1, rating: 5, nodes: [n3, n4], current: 0, voltageDrop: 0, price: 5000 },
+        { id: sw1Id, type: 'switch', position: sw1Pos, rotation: 0, value: 0, nodes: [n5, n6], current: 0, voltageDrop: 0, isOpen: true, text: 'P.Khách', price: 15000 },
+        { id: lamp1Id, type: 'lamp', position: lamp1Pos, rotation: 0, value: 100, nodes: [n7, n8], current: 0, voltageDrop: 0, text: 'Đèn P.Khách', price: 50000 },
+        { id: sw2Id, type: 'switch', position: sw2Pos, rotation: 0, value: 0, nodes: [n9, n10], current: 0, voltageDrop: 0, isOpen: true, text: 'Bếp', price: 15000 },
+        { id: lamp2Id, type: 'lamp', position: lamp2Pos, rotation: 0, value: 100, nodes: [n11, n12], current: 0, voltageDrop: 0, text: 'Đèn Bếp', price: 50000 },
+        { id: sw3Id, type: 'switch', position: sw3Pos, rotation: 0, value: 0, nodes: [n13, n14], current: 0, voltageDrop: 0, isOpen: true, text: 'Quạt', price: 15000 },
+        { id: fanId, type: 'lamp', position: fanPos, rotation: 0, value: 50, nodes: [n15, n16], current: 0, voltageDrop: 0, text: 'Quạt Trần', price: 350000 },
+      ];
+
+      const nodes: Node[] = [
+        { id: n1, position: { x: acPos.x - 30, y: acPos.y }, connections: [acId], voltage: 0 },
+        { id: n2, position: { x: acPos.x + 30, y: acPos.y }, connections: [acId], voltage: 0 },
+        { id: n3, position: { x: fusePos.x - 30, y: fusePos.y }, connections: [fuseId], voltage: 0 },
+        { id: n4, position: { x: fusePos.x + 30, y: fusePos.y }, connections: [fuseId], voltage: 0 },
+        { id: n5, position: { x: sw1Pos.x - 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
+        { id: n6, position: { x: sw1Pos.x + 30, y: sw1Pos.y }, connections: [sw1Id], voltage: 0 },
+        { id: n7, position: { x: lamp1Pos.x - 30, y: lamp1Pos.y }, connections: [lamp1Id], voltage: 0 },
+        { id: n8, position: { x: lamp1Pos.x + 30, y: lamp1Pos.y }, connections: [lamp1Id], voltage: 0 },
+        { id: n9, position: { x: sw2Pos.x - 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
+        { id: n10, position: { x: sw2Pos.x + 30, y: sw2Pos.y }, connections: [sw2Id], voltage: 0 },
+        { id: n11, position: { x: lamp2Pos.x - 30, y: lamp2Pos.y }, connections: [lamp2Id], voltage: 0 },
+        { id: n12, position: { x: lamp2Pos.x + 30, y: lamp2Pos.y }, connections: [lamp2Id], voltage: 0 },
+        { id: n13, position: { x: sw3Pos.x - 30, y: sw3Pos.y }, connections: [sw3Id], voltage: 0 },
+        { id: n14, position: { x: sw3Pos.x + 30, y: sw3Pos.y }, connections: [sw3Id], voltage: 0 },
+        { id: n15, position: { x: fanPos.x - 30, y: fanPos.y }, connections: [fanId], voltage: 0 },
+        { id: n16, position: { x: fanPos.x + 30, y: fanPos.y }, connections: [fanId], voltage: 0 },
+      ];
+
+      const wires = [
+        // Live Wire (L) -> Fuse -> Switches
+        { from: n1, to: n3, current: 0 }, // AC L to Fuse In
+        { from: n4, to: n5, current: 0 }, // Fuse Out to SW1 In
+        { from: n5, to: n9, current: 0 }, // SW1 In to SW2 In
+        { from: n9, to: n13, current: 0 }, // SW2 In to SW3 In
+        
+        // Switches -> Loads
+        { from: n6, to: n7, current: 0 }, // SW1 Out to Lamp1 In
+        { from: n10, to: n11, current: 0 }, // SW2 Out to Lamp2 In
+        { from: n14, to: n15, current: 0 }, // SW3 Out to Fan In
+        
+        // Loads -> Neutral Wire (N) -> AC N
+        { from: n8, to: n12, current: 0 }, // Lamp1 Out to Lamp2 Out
+        { from: n12, to: n16, current: 0 }, // Lamp2 Out to Fan Out
+        { from: n16, to: n2, current: 0 }, // Fan Out to AC N
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 0.8, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch điện nhà ở (Mô phỏng)","description":"Mô phỏng hệ thống điện cơ bản trong gia đình với nguồn AC 220V, cầu chì bảo vệ và các thiết bị tiêu thụ.","principle":"Điện lưới 220V được cấp qua cầu chì tổng. Các thiết bị (đèn, quạt) được mắc song song để hoạt động độc lập ở cùng điện áp.","application":"Hệ thống điện dân dụng."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  },
+  {
+    name: 'Mạch điện lớp học',
+    description: 'Hệ thống chiếu sáng và quạt trần trong lớp học tiêu chuẩn.',
+    principle: 'Các dãy đèn và quạt được điều khiển bởi các công tắc riêng biệt. Tất cả đều mắc song song với nguồn điện chính.',
+    application: 'Hệ thống điện trường học, văn phòng.',
+    create: () => {
+      const acId = uuidv4();
+      const swLightsId = uuidv4();
+      const swFansId = uuidv4();
+      const lamp1Id = uuidv4();
+      const lamp2Id = uuidv4();
+      const fan1Id = uuidv4();
+      const fan2Id = uuidv4();
+      
+      const acPos = { x: 100, y: 300 };
+      const swLPos = { x: 250, y: 200 };
+      const swFPos = { x: 250, y: 400 };
+      
+      const l1Pos = { x: 400, y: 150 };
+      const l2Pos = { x: 550, y: 150 };
+      
+      const f1Pos = { x: 400, y: 450 };
+      const f2Pos = { x: 550, y: 450 };
+
+      const n1 = uuidv4(); const n2 = uuidv4(); // AC
+      const n3 = uuidv4(); const n4 = uuidv4(); // SW Lights
+      const n5 = uuidv4(); const n6 = uuidv4(); // SW Fans
+      const n7 = uuidv4(); const n8 = uuidv4(); // Lamp 1
+      const n9 = uuidv4(); const n10 = uuidv4(); // Lamp 2
+      const n11 = uuidv4(); const n12 = uuidv4(); // Fan 1
+      const n13 = uuidv4(); const n14 = uuidv4(); // Fan 2
+
+      const components: Component[] = [
+        { id: acId, type: 'ac_source', position: acPos, rotation: 0, value: 220, nodes: [n1, n2], current: 0, voltageDrop: 0, price: 150000 },
+        { id: swLightsId, type: 'switch', position: swLPos, rotation: 0, value: 0, nodes: [n3, n4], current: 0, voltageDrop: 0, isOpen: true, text: 'Đèn', price: 15000 },
+        { id: swFansId, type: 'switch', position: swFPos, rotation: 0, value: 0, nodes: [n5, n6], current: 0, voltageDrop: 0, isOpen: true, text: 'Quạt', price: 15000 },
+        { id: lamp1Id, type: 'lamp', position: l1Pos, rotation: 0, value: 100, nodes: [n7, n8], current: 0, voltageDrop: 0, text: 'Đèn 1', price: 50000 },
+        { id: lamp2Id, type: 'lamp', position: l2Pos, rotation: 0, value: 100, nodes: [n9, n10], current: 0, voltageDrop: 0, text: 'Đèn 2', price: 50000 },
+        { id: fan1Id, type: 'lamp', position: f1Pos, rotation: 0, value: 50, nodes: [n11, n12], current: 0, voltageDrop: 0, text: 'Quạt 1', price: 350000 },
+        { id: fan2Id, type: 'lamp', position: f2Pos, rotation: 0, value: 50, nodes: [n13, n14], current: 0, voltageDrop: 0, text: 'Quạt 2', price: 350000 },
+      ];
+
+      const nodes: Node[] = [
+        { id: n1, position: { x: acPos.x - 30, y: acPos.y }, connections: [acId], voltage: 0 },
+        { id: n2, position: { x: acPos.x + 30, y: acPos.y }, connections: [acId], voltage: 0 },
+        { id: n3, position: { x: swLPos.x - 30, y: swLPos.y }, connections: [swLightsId], voltage: 0 },
+        { id: n4, position: { x: swLPos.x + 30, y: swLPos.y }, connections: [swLightsId], voltage: 0 },
+        { id: n5, position: { x: swFPos.x - 30, y: swFPos.y }, connections: [swFansId], voltage: 0 },
+        { id: n6, position: { x: swFPos.x + 30, y: swFPos.y }, connections: [swFansId], voltage: 0 },
+        { id: n7, position: { x: l1Pos.x - 30, y: l1Pos.y }, connections: [lamp1Id], voltage: 0 },
+        { id: n8, position: { x: l1Pos.x + 30, y: l1Pos.y }, connections: [lamp1Id], voltage: 0 },
+        { id: n9, position: { x: l2Pos.x - 30, y: l2Pos.y }, connections: [lamp2Id], voltage: 0 },
+        { id: n10, position: { x: l2Pos.x + 30, y: l2Pos.y }, connections: [lamp2Id], voltage: 0 },
+        { id: n11, position: { x: f1Pos.x - 30, y: f1Pos.y }, connections: [fan1Id], voltage: 0 },
+        { id: n12, position: { x: f1Pos.x + 30, y: f1Pos.y }, connections: [fan1Id], voltage: 0 },
+        { id: n13, position: { x: f2Pos.x - 30, y: f2Pos.y }, connections: [fan2Id], voltage: 0 },
+        { id: n14, position: { x: f2Pos.x + 30, y: f2Pos.y }, connections: [fan2Id], voltage: 0 },
+      ];
+
+      const wires = [
+        // AC L -> Switches
+        { from: n1, to: n3, current: 0 },
+        { from: n3, to: n5, current: 0 },
+        
+        // SW Lights -> Lamps (Parallel)
+        { from: n4, to: n7, current: 0 },
+        { from: n7, to: n9, current: 0 },
+        
+        // SW Fans -> Fans (Parallel)
+        { from: n6, to: n11, current: 0 },
+        { from: n11, to: n13, current: 0 },
+        
+        // Return Path (Neutral)
+        { from: n8, to: n10, current: 0 },
+        { from: n10, to: n12, current: 0 },
+        { from: n12, to: n14, current: 0 },
+        { from: n14, to: n2, current: 0 },
+      ];
+
+      const state: CircuitState = { components, nodes, wires, simulationRunning: true, time: 0, scale: 0.8, offset: { x: 0, y: 0 }, evaluationResult: null, levelProgress: {}, environment: { timeOfDay: 12, weather: 'sunny', temperature: 25, windSpeed: 5, isSimulationEnabled: false, timeSpeed: 1 }, currentExample: {"name":"Mạch điện lớp học","description":"Hệ thống chiếu sáng và quạt trần trong lớp học tiêu chuẩn.","principle":"Các dãy đèn và quạt được điều khiển bởi các công tắc riêng biệt. Tất cả đều mắc song song với nguồn điện chính.","application":"Hệ thống điện trường học, văn phòng."} };
+      const solved = solveCircuit(state);
+      return { ...state, nodes: solved.nodes, components: solved.components, wires: solved.wires };
+    }
+  },
 ];
 
 export const COMPLEX_EXAMPLES: CircuitExample[] = [

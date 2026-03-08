@@ -128,6 +128,14 @@ export function Wiki({ isOpen, onClose }: WikiProps) {
                     <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Mô tả</h4>
                     <p className="text-sm text-slate-600 leading-relaxed font-medium">{doc.description}</p>
                   </div>
+
+                  {/* Price Display */}
+                  {'price' in doc && (
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Giá thành</h4>
+                      <p className="text-sm text-emerald-600 leading-relaxed font-bold">{(doc as any).price.toLocaleString('vi-VN')} VND</p>
+                    </div>
+                  )}
                   
                   <div>
                     <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nguyên lý</h4>
